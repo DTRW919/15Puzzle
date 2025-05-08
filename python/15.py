@@ -1,3 +1,4 @@
+from tabnanny import check
 puzzle = [
     ["1", "2", "3", "4"],
     ["5", "6", "7", "8"],
@@ -22,37 +23,52 @@ def displayPuzzle():
 def findVal(y, x):
     return puzzle[y][x]
 
+def setTile(y, x, val = "0"): # Defaults to 0
+    puzzle[y][x] = val
+
 def findTile(target, display = False):
     for row, col in enumerate(puzzle):
         if target in col:
             if display:
                 print(f"Found {target} at row {row}, column {col.index(target)}")
             return row, col.index(target)
+
     print("not found")
     return -1, -1
 
-def setTile(y, x, val = "0"): # Defaults to 0
-    puzzle[y][x] = val
-
 def moveTile(move):
-    locY, locX = findTile("0")
+    locY, locX = findTile("0") # Location of empty tile
 
     if move == "up" and locY != len(puzzle) - 1:
         setTile(locY, locX, findVal(locY + 1, locX))
         setTile(locY + 1, locX)
         return
+
     if move == "down" and locY != 0:
         setTile(locY, locX, findVal(locY - 1, locX))
         setTile(locY - 1, locX)
         return
 
+    if move == "left" and locX != len(puzzle[0]) - 1:
+        setTile(locY, locX, findVal(locY, locX + 1))
+        setTile(locY, locX + 1)
+        return
+
+    if move == "right" and locX != 0:
+        setTile(locY, locX, findVal(locY, locX - 1))
+        setTile(locY, locX - 1)
+        return
+
     print("NOOOO")
 
 
+validMoves = ["left", "right", "up", "down", "exit"]
 
-displayPuzzle()
-
-moveTile("down")
-
-print()
-displayPuzzle()
+userInput = ""
+while True:
+    userInput = checkValidity(validMoves, "Enter a valid move")
+    if userInput == "exit":
+        break
+    moveTile(userInput)
+    print()
+    displayPuzzle()
