@@ -6,28 +6,53 @@ puzzle = [
 ]
 # 0 is the empty tile
 
-def findTile(x):
-    for row, col in enumerate(puzzle):
-        if x in col:
-            print(f"x at row {row + 1}, column {col.index(x) + 1}")
-            return row, col.index(x)
-    return -1, -1
-    
-def setTile(x, y, val = 0):
-    puzzle[x][y] = 
-
-# findTile(input(": ").strip().upper(), "row") # test
-
-def moveTile(move):
-    locX, locY = findTile(0)
-
-    if move == "up" and locY != len(puzzle[0]):
-        .
-
-
 def checkValidity(validOptions, prompt = ""):
     userInput = None
     while userInput not in validOptions:
         userInput = input(prompt + ": ")
 
     return userInput
+
+def displayPuzzle():
+    for row in range(len(puzzle)):
+        for val in puzzle[row]:
+            print(val, end = " ")
+        print()
+
+def findVal(y, x):
+    return puzzle[y][x]
+
+def findTile(target, display = False):
+    for row, col in enumerate(puzzle):
+        if target in col:
+            if display:
+                print(f"Found {target} at row {row}, column {col.index(target)}")
+            return row, col.index(target)
+    print("not found")
+    return -1, -1
+
+def setTile(y, x, val = "0"): # Defaults to 0
+    puzzle[y][x] = val
+
+def moveTile(move):
+    locY, locX = findTile("0")
+
+    if move == "up" and locY != len(puzzle) - 1:
+        setTile(locY, locX, findVal(locY + 1, locX))
+        setTile(locY + 1, locX)
+        return
+    if move == "down" and locY != 0:
+        setTile(locY, locX, findVal(locY - 1, locX))
+        setTile(locY - 1, locX)
+        return
+
+    print("NOOOO")
+
+
+
+displayPuzzle()
+
+moveTile("down")
+
+print()
+displayPuzzle()

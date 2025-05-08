@@ -6,5 +6,10 @@ myList = [
     [3, 4, 5]
 ]
 
+print(len(myList))
 print(len(myList[0]))
-print(myList)
+
+for row in range(len(myList)):
+    for val in myList[row]:
+        print(val, end = " ")
+    print()
