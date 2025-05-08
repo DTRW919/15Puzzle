@@ -96,19 +96,17 @@ def scramblePuzzle(puzzle):
 
 
 
-
+### Test ###
+validMoves = ["left", "right", "up", "down", "exit"]
 
 scramblePuzzle(puzzle)
 displayPuzzle(puzzle)
 
-### Test ###
-# validMoves = ["left", "right", "up", "down", "exit"]
-
-# userInput = ""
-# while True:
-#     userInput = checkValidity(validMoves, "Enter a valid move")
-#     if userInput == "exit":
-#         break
-#     moveTile(userInput)
-#     print()
-#     displayPuzzle()
+userInput = ""
+while True:
+    userInput = checkValidity(validMoves, "Enter a valid move")
+    if userInput == "exit":
+        break
+    moveTile(userInput)
+    print()
+    displayPuzzle(puzzle)
