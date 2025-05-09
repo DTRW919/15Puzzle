@@ -17,22 +17,17 @@ class Tile:
         return self.value
 
 
-spaceList = [
-    [],
-    [],
-    [],
-    []
-]
+
 
 root = tk.Tk()
 canvas = tk.Canvas(root, width = 800, height = 400, bg = "black")
 canvas.pack()
 
 def onMouseEnter(event, object):
-    print(object.getVal())
-    print(puzzle.getMove(object.getVal()))
+    # print(object.getVal())
+    # print(puzzle.getMove(object.getVal()))
 
-    puzzle.moveTile(puzzle.getMove(object.getVal()))
+    # puzzle.moveTile(puzzle.getMove(object.getVal()))
 
     updateBoard()
 
@@ -42,17 +37,24 @@ def updateBoard():
             tileObj = spaceList[i][j]
             tileObj.value = puzzle.getVal(j, i)
 
-            if tileObj.value == "0":
+            if tileObj.value == "0": # its an int now not a string
                 canvas.itemconfigure(tileObj.canvas_id, fill = "black", outline = "black")
                 canvas.itemconfigure(tileObj.text_id, text = "")
             else:
                 canvas.itemconfigure(tileObj.canvas_id, fill = "blue", outline = "white")
-                canvas.itemconfigure(tileObj.text_id, text = tileObj.getVal())
+                canvas.itemconfigure(tileObj.text_id, text = int(tileObj.getVal(), 16))
 
 
 
 length = 50
 space = length + 1
+
+spaceList = [
+    [],
+    [],
+    [],
+    []
+]
 
 for i in range(4): # TODO: change to be flexible
     for j in range(4):
@@ -63,8 +65,6 @@ for i in range(4): # TODO: change to be flexible
         tileObj.x = i * space
         tileObj.y = j * space
 
-        tileObj.value = puzzle.getVal(j, i)
-
         tileObj.canvas_id = canvas.create_rectangle(
             tileObj.x, tileObj.y,
             tileObj.x + length,
@@ -74,15 +74,11 @@ for i in range(4): # TODO: change to be flexible
         tileObj.text_id = canvas.create_text(
             tileObj.x + length / 2,
             tileObj.y + length / 2,
-            text = puzzle.getVal(j, i)
+            text = tileObj.getVal()
         )
 
         canvas.tag_bind(tileObj.canvas_id, "<Enter>", lambda e, o = tileObj: onMouseEnter(e, o))
 
-        print(int(puzzle.getVal(i, j), 16))
-
-    print()
-
-
+updateBoard()
 
 root.mainloop()
