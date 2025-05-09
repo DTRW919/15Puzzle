@@ -78,27 +78,27 @@ def moveTile(move, advanced = False):
             return
     print("No valid moves")
 
-def getInversions(flatPuzzle):
-    inversions = 0
-
-    zeroPos = flatPuzzle.index(0)
-    flatPuzzle.remove(0)
-
-    for i in range(len(flatPuzzle)):
-        for j in range(i + 1, len(flatPuzzle)):
-            if flatPuzzle[i] > flatPuzzle[j]:
-                inversions += 1
-
-    flatPuzzle.insert(zeroPos, 0)
-
-    print(f"there are {inversions} inversions")
-    print(*flatPuzzle)
-    return inversions
-
-def shuffleFlatPuzzle(flatPuzzle):
-    return random.shuffle(flatPuzzle)
-
 def scramblePuzzle(puzzle):
+    def getInversions(flatPuzzle):
+        inversions = 0
+
+        zeroPos = flatPuzzle.index(0)
+        flatPuzzle.remove(0)
+
+        for i in range(len(flatPuzzle)):
+            for j in range(i + 1, len(flatPuzzle)):
+                if flatPuzzle[i] > flatPuzzle[j]:
+                    inversions += 1
+
+        flatPuzzle.insert(zeroPos, 0)
+
+        print(f"there are {inversions} inversions")
+        print(*flatPuzzle)
+        return inversions
+
+    def shuffleFlatPuzzle(flatPuzzle):
+        return random.shuffle(flatPuzzle)
+
     flatPuzzle = [int(item, 16) for sublist in puzzle for item in sublist]
 
     shuffleFlatPuzzle(flatPuzzle)
@@ -106,8 +106,8 @@ def scramblePuzzle(puzzle):
     inversions = getInversions(flatPuzzle)
     zeroRow = 4 - (flatPuzzle.index(0) // 4) # row number from bottom because proofs idk
 
-    if (inversions % 2) ^ (zeroRow % 2) != 1:
-        print("it DIDNT WORK TRYING AGAIN")
+    if (inversions % 2) ^ (zeroRow % 2) != 1: # TODO: Make sure this works
+        print("Unsolvable. Trying again.") # TODO: Redo shuffling algorithm to manually shuffle from sovled state to guarantee
         scramblePuzzle(puzzle)
     else:
         for row in range(4):
