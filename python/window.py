@@ -24,7 +24,7 @@ canvas = tk.Canvas(root, width = 800, height = 400, bg = "black")
 canvas.pack()
 
 def onMouseEnter(event, object): # TODO: Advanced mousemovement (doesnt need to be adjacent to zero)
-    # puzzle.moveTile(puzzle.getMove(object.getVal()))
+    puzzle.moveTile(puzzle.getMove(object.getVal()))
 
     updateBoard()
 
@@ -33,14 +33,19 @@ def updateBoard():
         for j in range(4):
             tileObj = spaceList[i][j]
             tileObj.value = puzzle.getVal(i, j)
+            displayValue = int(tileObj.value, 16)
 
             if tileObj.value == "0": # its an int now not a string
                 canvas.itemconfigure(tileObj.canvas_id, fill = "black", outline = "black")
                 canvas.itemconfigure(tileObj.text_id, text = "")
             else:
-                canvas.itemconfigure(tileObj.canvas_id, fill = "blue", outline = "white")
-                canvas.itemconfigure(tileObj.text_id, text = int(tileObj.getVal(), 16))
-                # canvas.itemconfigure(tileObj.text_id, text = tileObj.ID)
+                if tileObj.ID == displayValue:
+                    canvas.itemconfigure(tileObj.canvas_id, fill = "orange", outline = "white")
+                else:
+                    canvas.itemconfigure(tileObj.canvas_id, fill = "blue", outline = "white")
+
+                canvas.itemconfigure(tileObj.text_id, text = displayValue)
+                # canvas.itemconfigure(tileObj.text_id, text = tileObj.ID) # Show ID instead of Value
 
 
 
@@ -56,7 +61,7 @@ spaceList = [
 
 for i in range(4): # TODO: change to be flexible between puzzle sizes
     for j in range(4):
-        spaceList[i].append(Tile((i * 4)))
+        spaceList[i].append(Tile((i * 4) + j + 1))
 
         tileObj = spaceList[i][j]
 
