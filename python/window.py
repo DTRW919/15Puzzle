@@ -27,7 +27,7 @@ def onMouseEnter(event, object):
     # print(object.getVal())
     # print(puzzle.getMove(object.getVal()))
 
-    # puzzle.moveTile(puzzle.getMove(object.getVal()))
+    puzzle.moveTile(puzzle.getMove(object.getVal()))
 
     updateBoard()
 
