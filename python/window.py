@@ -23,10 +23,7 @@ root = tk.Tk()
 canvas = tk.Canvas(root, width = 800, height = 400, bg = "black")
 canvas.pack()
 
-def onMouseEnter(event, object):
-    # print(object.getVal())
-    # print(puzzle.getMove(object.getVal()))
-
+def onMouseEnter(event, object): # TODO: Advanced mousemovement (doesnt need to be adjacent to zero)
     puzzle.moveTile(puzzle.getMove(object.getVal()))
 
     updateBoard()

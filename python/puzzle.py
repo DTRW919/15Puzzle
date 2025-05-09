@@ -15,7 +15,7 @@ def checkValidity(validOptions, prompt = ""):
 
     return userInput
 
-def displayPuzzle(puzzle):
+def displayPuzzle(puzzle): # TODO: Maybe remove all unecessary 'puzzle' parameters?
     for row in range(len(puzzle)):
         for val in puzzle[row]:
             print(val, end = " ")
@@ -53,30 +53,30 @@ def findTile(target, puzzle = puzzle):
     print("Error: target not found")
     return -1, -1
 
-def moveTile(move):
+def moveTile(move, advanced = False):
     locY, locX = findTile("0") # Location of empty tile
 
-    if move == "up" and locY != len(puzzle) - 1:
-        setTile(locY, locX, getVal(locY + 1, locX))
-        setTile(locY + 1, locX)
-        return
+    if not advanced:
+        if move == "up" and locY != len(puzzle) - 1:
+            setTile(locY, locX, getVal(locY + 1, locX))
+            setTile(locY + 1, locX)
+            return
 
-    if move == "down" and locY != 0:
-        setTile(locY, locX, getVal(locY - 1, locX))
-        setTile(locY - 1, locX)
-        return
+        if move == "down" and locY != 0:
+            setTile(locY, locX, getVal(locY - 1, locX))
+            setTile(locY - 1, locX)
+            return
 
-    if move == "left" and locX != len(puzzle[0]) - 1:
-        setTile(locY, locX, getVal(locY, locX + 1))
-        setTile(locY, locX + 1)
-        return
+        if move == "left" and locX != len(puzzle[0]) - 1:
+            setTile(locY, locX, getVal(locY, locX + 1))
+            setTile(locY, locX + 1)
+            return
 
-    if move == "right" and locX != 0:
-        setTile(locY, locX, getVal(locY, locX - 1))
-        setTile(locY, locX - 1)
-        return
-
-    print("NOOOO")
+        if move == "right" and locX != 0:
+            setTile(locY, locX, getVal(locY, locX - 1))
+            setTile(locY, locX - 1)
+            return
+    print("No valid moves")
 
 def getInversions(flatPuzzle):
     inversions = 0
@@ -112,7 +112,7 @@ def scramblePuzzle(puzzle):
     else:
         for row in range(4):
             for col in range(4):
-                puzzle[row][col] = hex(flatPuzzle[(row * 4) + col]).upper() [2 :]
+                puzzle[row][col] = hex(flatPuzzle[(row * 4) + col]).upper()[2 :]
 
 ### Test ###
 
