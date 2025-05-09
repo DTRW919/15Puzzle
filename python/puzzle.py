@@ -40,7 +40,7 @@ def getMove(target): # Checks if adjacent to empty tile
             return "right"
         if zeroX - targetX == -1:
             return "left"
-    return None
+    return "No Valid Moves"
 
 def setTile(y, x, val = "0"): # Defaults to 0
     puzzle[y][x] = val
@@ -76,7 +76,6 @@ def moveTile(move, advanced = False):
             setTile(locY, locX, getVal(locY, locX - 1))
             setTile(locY, locX - 1)
             return
-    print("No valid moves")
 
 def scramblePuzzle(puzzle):
     def getInversions(flatPuzzle):
