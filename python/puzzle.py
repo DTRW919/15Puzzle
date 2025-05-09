@@ -41,10 +41,26 @@ def displayPuzzle(puzzle):
             print(val, end = " ")
         print()
 
-def findVal(y, x):
+def getVal(y, x):
     value = puzzle[y][x]
 
     return value
+
+def getMove(target): # Checks if adjacent to empty tile
+    zeroY, zeroX = findTile("0")
+    targetY, targetX = findTile(target)
+
+    if zeroX == targetX:
+        if zeroY - targetY == 1:
+            return "down"
+        if zeroY - targetY == -1:
+            return "up"
+    if zeroY == targetY:
+        if zeroX - targetX == 1:
+            return "right"
+        if zeroX - targetX == -1:
+            return "left"
+    return None
 
 def setTile(y, x, val = "0"): # Defaults to 0
     puzzle[y][x] = val
@@ -63,22 +79,22 @@ def moveTile(move):
     locY, locX = findTile("0") # Location of empty tile
 
     if move == "up" and locY != len(puzzle) - 1:
-        setTile(locY, locX, findVal(locY + 1, locX))
+        setTile(locY, locX, getVal(locY + 1, locX))
         setTile(locY + 1, locX)
         return
 
     if move == "down" and locY != 0:
-        setTile(locY, locX, findVal(locY - 1, locX))
+        setTile(locY, locX, getVal(locY - 1, locX))
         setTile(locY - 1, locX)
         return
 
     if move == "left" and locX != len(puzzle[0]) - 1:
-        setTile(locY, locX, findVal(locY, locX + 1))
+        setTile(locY, locX, getVal(locY, locX + 1))
         setTile(locY, locX + 1)
         return
 
     if move == "right" and locX != 0:
-        setTile(locY, locX, findVal(locY, locX - 1))
+        setTile(locY, locX, getVal(locY, locX - 1))
         setTile(locY, locX - 1)
         return
 
@@ -97,16 +113,16 @@ def scramblePuzzle(puzzle):
 
 
 ### Test ###
-validMoves = ["left", "right", "up", "down", "exit"]
+# validMoves = ["left", "right", "up", "down", "exit"]
 
 scramblePuzzle(puzzle)
 displayPuzzle(puzzle)
 
-userInput = ""
-while True:
-    userInput = checkValidity(validMoves, "Enter a valid move")
-    if userInput == "exit":
-        break
-    moveTile(userInput)
-    print()
-    displayPuzzle(puzzle)
+# userInput = ""
+# while True:
+#     userInput = checkValidity(validMoves, "Enter a valid move")
+#     if userInput == "exit":
+#         break
+#     moveTile(userInput)
+#     print()
+#     displayPuzzle(puzzle)
