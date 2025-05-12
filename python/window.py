@@ -1,7 +1,6 @@
 import tkinter as tk
 import puzzle
-
-moveTracker = ""
+import moveTimer
 
 class Tile:
     def __init__(self, ID, value = 0, color = "gray"):
@@ -56,55 +55,58 @@ canvas.pack()
 root.bind("<KeyPress>", keyChecker)
 canvas.focus_set()
 
+movePerSecondLabel = tk.Label(root, text = "")
+movePerSecondLabel.pack(anchor = "s")
+
 solved = False
 
 def onListEnter():
-    global moveTracker
-
     moveList = puzzle.checkListValidity()
     print("The move list contains:", moveList)
     for move in list(moveList):
-        moveTracker += move
         puzzle.moveTile(moveConverter(move))
+        moveTimer.addMove(move)
     updateBoard()
 
 def onKeyPress(key):
     global solved
-    global moveTracker
 
     if not solved:
         if key == "Up" or key == "w":
-            moveTracker += puzzle.moveTile("up")
+            moveTimer.addMove(puzzle.moveTile("up"))
+
         if key == "Down" or key == "s":
-            moveTracker += puzzle.moveTile("down")
+            moveTimer.addMove(puzzle.moveTile("down"))
+
         if key == "Left" or key == "a":
-            moveTracker += puzzle.moveTile("left")
+            moveTimer.addMove(puzzle.moveTile("left"))
+
         if key == "Right" or key == "d":
-            moveTracker += puzzle.moveTile("right")
+            moveTimer.addMove(puzzle.moveTile("right"))
 
     updateBoard()
 
 def onMouseEnter(event, object): # TODO: Advanced mousemovement (doesnt need to be adjacent to zero)
     global solved
-    global moveTracker
 
     if not solved:
         currentMove = moveConverter(puzzle.getMove(object.getVal()))
-        if isinstance(currentMove, str):
-            moveTracker += currentMove
+
+        if currentMove != None:
+            moveTimer.addMove(currentMove)
 
         puzzle.moveTile(puzzle.getMove(object.getVal()))
 
     updateBoard()
 
 def resetBoard():
+        moveTimer.restartTime()
         puzzle.scramblePuzzle()
         puzzle.displayPuzzle()
         updateBoard()
 
 def updateBoard():
     global solved
-    global moveTracker
 
     solved = True
 
@@ -126,8 +128,6 @@ def updateBoard():
 
                 canvas.itemconfigure(tileObj.text_id, text = displayValue)
                 # canvas.itemconfigure(tileObj.text_id, text = tileObj.ID) # Show ID instead of Value
-
-    print(moveTracker)
 
 
 length = 50
@@ -164,8 +164,16 @@ for i in range(4): # TODO: change to be flexible between puzzle sizes
         canvas.tag_bind(tileObj.canvas_id, "<Enter>", lambda e, o = tileObj: onMouseEnter(e, o))
 
 
+
+def updateMPS():
+    movesPerSecond = moveTimer.getMPS()
+    movePerSecondLabel.config(text = f"MPS: {movesPerSecond}")
+    updateBoard()
+    root.after(100, updateMPS)  # Call as often as possible (every ~1ms)
+
 # Initial setup
 resetBoard()
 updateBoard()
+updateMPS()
 
 root.mainloop()
