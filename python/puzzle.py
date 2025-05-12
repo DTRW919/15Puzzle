@@ -8,14 +8,36 @@ puzzle = [
 ]
 # 0 is the empty tile
 
-def checkValidity(validOptions, prompt = ""):
+def checkListValidity(prompt = ""):
+    userInput = " "
+    userList = list(userInput)
+
+    validMoves = ["w", "s", "a", "d"]
+
+    flag = False
+
+    while not flag:
+        flag = True
+        for char in userList:
+            if char not in validMoves:
+                flag = False
+
+        if not flag:
+            userInput = input(prompt + ": ")
+            userList = list(userInput)
+            print(userList)
+
+    return userInput
+
+def checkValidity(validOptions = [], prompt = ""):
     userInput = None
+
     while userInput not in validOptions:
         userInput = input(prompt + ": ")
 
     return userInput
 
-def displayPuzzle(puzzle): # TODO: Maybe remove all unecessary 'puzzle' parameters?
+def displayPuzzle(): # TODO: Maybe remove all unecessary 'puzzle' parameters?
     for row in range(len(puzzle)):
         for val in puzzle[row]:
             print(val, end = " ")
@@ -40,7 +62,7 @@ def getMove(target): # Checks if adjacent to empty tile
             return "right"
         if zeroX - targetX == -1:
             return "left"
-    return "No Valid Moves"
+    return "invalid"
 
 def setTile(y, x, val = "0"): # Defaults to 0
     puzzle[y][x] = val
@@ -60,24 +82,28 @@ def moveTile(move, advanced = False):
         if move == "up" and locY != len(puzzle) - 1:
             setTile(locY, locX, getVal(locY + 1, locX))
             setTile(locY + 1, locX)
-            return
+            return "w"
 
         if move == "down" and locY != 0:
             setTile(locY, locX, getVal(locY - 1, locX))
             setTile(locY - 1, locX)
-            return
+            return "s"
 
         if move == "left" and locX != len(puzzle[0]) - 1:
             setTile(locY, locX, getVal(locY, locX + 1))
             setTile(locY, locX + 1)
-            return
+            return "a"
 
         if move == "right" and locX != 0:
             setTile(locY, locX, getVal(locY, locX - 1))
             setTile(locY, locX - 1)
-            return
+            return "d"
 
-def scramblePuzzle(puzzle):
+    return ""
+
+def scramblePuzzle():
+    print("Resetting puzzle...")
+
     def getInversions(flatPuzzle):
         inversions = 0
 
@@ -107,16 +133,14 @@ def scramblePuzzle(puzzle):
 
     if (inversions % 2) ^ (zeroRow % 2) != 1: # TODO: Make sure this works
         print("Unsolvable. Trying again.") # TODO: Redo shuffling algorithm to manually shuffle from sovled state to guarantee
-        scramblePuzzle(puzzle)
+        scramblePuzzle()
     else:
         for row in range(4):
             for col in range(4):
                 puzzle[row][col] = hex(flatPuzzle[(row * 4) + col]).upper()[2 :]
 
 ### Test ###
-
-scramblePuzzle(puzzle)
-displayPuzzle(puzzle)
+# checkValidity(listCheck = True)
 
 # validMoves = ["left", "right", "up", "down", "exit"]
 # userInput = ""
