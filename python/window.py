@@ -51,12 +51,15 @@ def keyChecker(event):
 
 root = tk.Tk()
 canvas = tk.Canvas(root, width = 800, height = 400, bg = "black")
-canvas.pack()
+canvas.grid(row = 1, column = 0)
 root.bind("<KeyPress>", keyChecker)
 canvas.focus_set()
 
 movePerSecondLabel = tk.Label(root, text = "")
-movePerSecondLabel.pack(anchor = "s")
+movePerSecondLabel.grid(row = 0, column = 0, sticky = "se")
+
+moveTotalLabel = tk.Label(root, text = "")
+moveTotalLabel.grid(row = 0, column = 0, sticky = "sw")
 
 solved = False
 
@@ -167,7 +170,10 @@ for i in range(4): # TODO: change to be flexible between puzzle sizes
 
 def updateMPS():
     movesPerSecond = moveTimer.getMPS()
+    movesTotal = moveTimer.getMoves()
+
     movePerSecondLabel.config(text = f"MPS: {movesPerSecond}")
+    moveTotalLabel.config(text = f"Moves: {movesTotal}")
     updateBoard()
     root.after(100, updateMPS)  # Call as often as possible (every ~1ms)
 

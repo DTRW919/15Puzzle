@@ -16,19 +16,25 @@ def restartTime():
 def checkMPSe():
     return "e"
 
-def checkMPS():
+def checkMoveHistory():
     global movesHistory
 
-    currentTime = time.time()
-    movesHistory = [entry for entry in movesHistory if currentTime - entry.timestamp <= 1]
+    movesHistory = [entry for entry in movesHistory if entry.direction != ""]
 
 def addMove(direction):
     global movesHistory
 
     movesHistory.append(Move(direction))
 
+def getMoves():
+    global movesHistory
+
+    return len(movesHistory)
+
 def getMPS():
     global movesHistory
+
+    checkMoveHistory()
 
     currentTime = time.time()
     lastSecond = [entry for entry in movesHistory if currentTime - entry.timestamp <= 1]
