@@ -98,7 +98,7 @@ def getAdvanced():
     return advanced
 
 root = tk.Tk()
-canvas = tk.Canvas(root, width = 800, height = 400, bg = "black")
+canvas = tk.Canvas(root, width = 800, height = 400, bg = "black", highlightthickness = 0)
 canvas.grid(row = 1, column = 0, sticky = "nsew")
 canvas.bind("<Configure>", onResize)
 
