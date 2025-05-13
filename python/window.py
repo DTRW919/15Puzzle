@@ -27,15 +27,17 @@ class Tile:
 
 def getColor(val):
     if val in {1, 2, 3, 4}:
-        return "red"
+        return "#f5462f"
     if val in {5, 9, 13}:
-        return "yellow"
+        return "#ffc917"
     if val in {6, 7, 8}:
-        return "green"
+        return "#1eb34b"
     if val in {10, 14}:
-        return "blue"
-    if val in {11, 12, 15}:
-        return "purple"
+        return "#3081bf"
+    if val in {11, 12}:
+        return "#5f3787"
+    if val in {15}:
+        return "#b34db1"
 
 def moveConverter(moveOrID):
     moveToID = {
@@ -193,26 +195,26 @@ def updateBoard(advanced = False, reset = False):
 
                 if not advanced:
                     if tileObj.value == "0":
-                        canvas.itemconfigure(tileObj.canvas_id, fill = "black")
+                        canvas.itemconfigure(tileObj.canvas_id, fill = "black", outline = "black")
                         canvas.itemconfigure(tileObj.text_id, text = "")
                     else:
                         if tileObj.ID == displayValue:
-                            canvas.itemconfigure(tileObj.canvas_id, fill = "orange")
+                            canvas.itemconfigure(tileObj.canvas_id, fill = "orange", outline = "black")
                         else:
                             solved = False
-                            canvas.itemconfigure(tileObj.canvas_id, fill = "blue")
+                            canvas.itemconfigure(tileObj.canvas_id, fill = "blue", outline = "black")
 
-                        canvas.itemconfigure(tileObj.text_id, text = displayValue)
+                        canvas.itemconfigure(tileObj.text_id, text = displayValue, fill = "white")
                         # canvas.itemconfigure(tileObj.text_id, text = tileObj.ID) # Show something instead of Value
                 else:
                     if tileObj.value == "0":
-                        canvas.itemconfigure(tileObj.canvas_id, fill = "black")
+                        canvas.itemconfigure(tileObj.canvas_id, fill = "black", outline = "")
                         canvas.itemconfigure(tileObj.text_id, text = "")
                     else:
                         if tileObj.ID != displayValue:
                             solved = False
-                        canvas.itemconfigure(tileObj.canvas_id, fill = getColor(displayValue))
-                        canvas.itemconfigure(tileObj.text_id, text = displayValue)
+                        canvas.itemconfigure(tileObj.canvas_id, fill = getColor(displayValue), outline = "")
+                        canvas.itemconfigure(tileObj.text_id, text = displayValue, fill = "black")
         if solved:
             stats.setSolving(False)
             allMoves = [move.direction for move in stats.getMovesHistory()]
@@ -235,32 +237,26 @@ for i in range(4): # TODO: change to be flexible between puzzle sizes
         tileObj.x = j * (boxSpacing + boxWidth)
         tileObj.y = i * (boxSpacing + boxWidth)
 
-        # tileObj.canvas_id = canvas.create_rectangle(
-        #     tileObj.x, tileObj.y,
-        #     tileObj.x + boxWidth,
-        #     tileObj.y + boxWidth,
-        #     fill = "blue"
-        # )
-
         xPos = ((root.winfo_width() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.col) + boxSpacing)
         yPos = ((root.winfo_height() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.row) + boxSpacing)
 
         tileObj.canvas_id = canvas.create_rectangle(
             xPos, tileObj.y,
             xPos + boxWidth, tileObj.y + boxWidth,
-            fill = "blue"
+            fill = "blue",
+            outline = "black",
+            width = 5
         )
 
         tileObj.text_id = canvas.create_text(
             xPos + boxWidth / 2,
             tileObj.y + boxWidth / 2,
             text = tileObj.getVal(),
-            font = ("SF Pro", 50)
+            fill = "white",
+            font = ("SF Pro", 50, "bold")
         )
 
         canvas.tag_bind(tileObj.canvas_id, "<Enter>", lambda e, o = tileObj: onMouseEnter(e, o))
-
-
 
 def updateInfo():
     movesPerSecond = stats.getMPS()
