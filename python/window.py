@@ -25,6 +25,18 @@ class Tile:
         elif otherValue == "col":
             return self.col
 
+def getColor(val):
+    if val in {1, 2, 3, 4}:
+        return "red"
+    if val in {5, 9, 13}:
+        return "yellow"
+    if val in {6, 7, 8}:
+        return "green"
+    if val in {10, 14}:
+        return "blue"
+    if val in {11, 12, 15}:
+        return "purple"
+
 def moveConverter(moveOrID):
     moveToID = {
         "up" : "w",
@@ -69,10 +81,19 @@ def onResize(event):
             canvas.coords(tileObj.text_id, xPos + boxWidth / 2, yPos + boxWidth / 2)
 
 def onAdvancedToggle():
-    print(f"Toggled Advanced Mode {advanced.get()}")
+    global advanced
+
+    if advanced:
+        advanced = False
+    else:
+        advanced = True
+
+    print(f"Toggled Advanced Move {advanced}")
 
 def getAdvanced():
-    return advanced.get()
+    global advanced
+
+    return advanced
 
 root = tk.Tk()
 canvas = tk.Canvas(root, width = 800, height = 400, bg = "black")
@@ -98,8 +119,9 @@ moveTotalLabel.grid(row = 0, column = 0, sticky = "nw")
 timeTakenLabel = tk.Label(root, text = "")
 timeTakenLabel.grid(row = 0, column = 0, sticky = "n")
 
-advanced = tk.BooleanVar() # Advanced boolean
-advancedToggle = tk.Checkbutton(root, text = "Advanced Mode?", variable = advanced, command = onAdvancedToggle)
+# advanced = tk.BooleanVar() # Advanced boolean
+advanced = False
+advancedToggle = tk.Checkbutton(root, text = "Advanced Mode?", command = onAdvancedToggle)
 advancedToggle.grid(row = 2, column = 0, sticky = "se")
 
 solved = False # Check if puzzle is solved
@@ -113,7 +135,7 @@ def onListEnter():
     for move in list(moveList):
         puzzle.moveTile(moveConverter(move), getAdvanced())
         stats.addMove(move)
-    updateBoard()
+    # updateBoard()
 
 def onKeyPress(key):
     global solved
@@ -131,7 +153,7 @@ def onKeyPress(key):
         if key == "Right" or key == "d":
             stats.addMove(puzzle.moveTile("right", getAdvanced()))
 
-    updateBoard()
+    # updateBoard()
 
 def onMouseEnter(event, object): # TODO: Advanced mousemovement (doesnt need to be adjacent to zero)
     global solved
@@ -144,7 +166,7 @@ def onMouseEnter(event, object): # TODO: Advanced mousemovement (doesnt need to 
 
         puzzle.moveTile(puzzle.getMove(object.getVal(), getAdvanced()), getAdvanced(), object.getVal("col"), object.getVal("row"))
 
-    updateBoard()
+    # updateBoard()
 
 def resetBoard():
         stats.resetAll()
@@ -156,7 +178,7 @@ boxWidth = 100
 boxSpacing = 1
 puzzleWidth = boxWidth * 4
 
-def updateBoard(reset = False):
+def updateBoard(advanced = False, reset = False):
     global solved
 
     if not solved or reset:
@@ -167,26 +189,30 @@ def updateBoard(reset = False):
                 tileObj = spaceList[i][j]
                 tileObj.value = puzzle.getVal(i, j)
 
-                # xPos = ((canvas.winfo_width() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.col) + boxSpacing)
-                # yPos = ((canvas.winfo_height() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.row) + boxSpacing)
-
-                # canvas.coords(tileObj.canvas_id, xPos, yPos, xPos + boxWidth, yPos + boxWidth)
-                # canvas.coords(tileObj.text_id, xPos + boxWidth / 2, yPos + boxWidth / 2)
-
                 displayValue = int(tileObj.value, 16)
 
-                if tileObj.value == "0": # its an int now not a string
-                    canvas.itemconfigure(tileObj.canvas_id, fill = "black")
-                    canvas.itemconfigure(tileObj.text_id, text = "")
-                else:
-                    if tileObj.ID == displayValue:
-                        canvas.itemconfigure(tileObj.canvas_id, fill = "orange", outline = "white")
+                if not advanced:
+                    if tileObj.value == "0":
+                        canvas.itemconfigure(tileObj.canvas_id, fill = "black")
+                        canvas.itemconfigure(tileObj.text_id, text = "")
                     else:
-                        solved = False
-                        canvas.itemconfigure(tileObj.canvas_id, fill = "blue", outline = "white")
+                        if tileObj.ID == displayValue:
+                            canvas.itemconfigure(tileObj.canvas_id, fill = "orange")
+                        else:
+                            solved = False
+                            canvas.itemconfigure(tileObj.canvas_id, fill = "blue")
 
-                    canvas.itemconfigure(tileObj.text_id, text = displayValue)
-                    # canvas.itemconfigure(tileObj.text_id, text = tileObj.ID) # Show something instead of Value
+                        canvas.itemconfigure(tileObj.text_id, text = displayValue)
+                        # canvas.itemconfigure(tileObj.text_id, text = tileObj.ID) # Show something instead of Value
+                else:
+                    if tileObj.value == "0":
+                        canvas.itemconfigure(tileObj.canvas_id, fill = "black")
+                        canvas.itemconfigure(tileObj.text_id, text = "")
+                    else:
+                        if tileObj.ID != displayValue:
+                            solved = False
+                        canvas.itemconfigure(tileObj.canvas_id, fill = getColor(displayValue))
+                        canvas.itemconfigure(tileObj.text_id, text = displayValue)
         if solved:
             stats.setSolving(False)
             allMoves = [move.direction for move in stats.getMovesHistory()]
@@ -245,7 +271,7 @@ def updateInfo():
     moveTotalLabel.config(text = f"Moves: {movesTotal}")
     timeTakenLabel.config(text = f"Time: {timeTaken}")
 
-    updateBoard()
+    updateBoard(advanced = getAdvanced())
 
     root.after(20, updateInfo)  # Call as often as possible (every ~1ms)
 
