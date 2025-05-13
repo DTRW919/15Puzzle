@@ -52,9 +52,22 @@ def keyChecker(event):
     if key in movementKeys:
         onKeyPress(key)
 
+def onResize(event):
+    for i in range(4):
+        for j in range(4):
+            tileObj = spaceList[i][j]
+
+            xPos = ((canvas.winfo_width() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.col) + boxSpacing)
+            yPos = ((canvas.winfo_height() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.row) + boxSpacing)
+
+            canvas.coords(tileObj.canvas_id, xPos, yPos, xPos + boxWidth, yPos + boxWidth)
+            canvas.coords(tileObj.text_id, xPos + boxWidth / 2, yPos + boxWidth / 2)
+
 root = tk.Tk()
 canvas = tk.Canvas(root, width = 800, height = 400, bg = "black")
 canvas.grid(row = 1, column = 0, sticky = "nsew")
+canvas.bind("<Configure>", onResize)
+
 root.bind("<KeyPress>", keyChecker)
 
 root.grid_columnconfigure(0, weight = 1)
@@ -139,11 +152,11 @@ def updateBoard(reset = False):
                 tileObj = spaceList[i][j]
                 tileObj.value = puzzle.getVal(i, j)
 
-                xPos = ((canvas.winfo_width() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.col) + boxSpacing)
-                yPos = ((canvas.winfo_height() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.row) + boxSpacing)
+                # xPos = ((canvas.winfo_width() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.col) + boxSpacing)
+                # yPos = ((canvas.winfo_height() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.row) + boxSpacing)
 
-                canvas.coords(tileObj.canvas_id, xPos, yPos, xPos + boxWidth, yPos + boxWidth)
-                canvas.coords(tileObj.text_id, xPos + boxWidth / 2, yPos + boxWidth / 2)
+                # canvas.coords(tileObj.canvas_id, xPos, yPos, xPos + boxWidth, yPos + boxWidth)
+                # canvas.coords(tileObj.text_id, xPos + boxWidth / 2, yPos + boxWidth / 2)
 
                 displayValue = int(tileObj.value, 16)
 
@@ -162,7 +175,7 @@ def updateBoard(reset = False):
         if solved:
             stats.setSolving(False)
             allMoves = [move.direction for move in stats.getMovesHistory()]
-            print(f"It took you {stats.getNumMoves()} to solve this puzzle in ___ seconds. The sequence you took is:")
+            print(f"It took you {stats.getNumMoves()} to solve this puzzle in {stats.getTime()} seconds. The sequence you took is:")
             print(*allMoves, sep = "")
 
 spaceList = [

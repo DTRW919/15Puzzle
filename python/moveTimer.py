@@ -4,8 +4,7 @@ movesHistory = []
 movesPerSecond = 0.0
 startTime = time.time()
 timeTaken = 0.0
-
-solving = False # Not boolean; if 0.0 then not solving if not thent represents time taken to solve
+solving = False
 
 class Move:
     def __init__(self, direction):
