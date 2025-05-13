@@ -9,12 +9,19 @@ class Move:
         self.timestamp = time.time()
         self.direction = direction
 
-def restartTime():
+def resetAll():
+    global movesHistory
+    global movesPerSecond
     global startTime
+
+    movesHistory = []
+    movesPerSecond = 0.0
     startTime = time.time()
 
-def checkMPSe():
-    return "e"
+def getTime():
+    global startTime
+
+    return round(time.time() - startTime, 3)
 
 def checkMoveHistory():
     global movesHistory
@@ -26,10 +33,15 @@ def addMove(direction):
 
     movesHistory.append(Move(direction))
 
-def getMoves():
+def getNumMoves():
     global movesHistory
 
     return len(movesHistory)
+
+def getMovesHistory():
+    global movesHistory
+
+    return movesHistory
 
 def getMPS():
     global movesHistory

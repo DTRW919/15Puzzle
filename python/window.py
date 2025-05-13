@@ -71,7 +71,11 @@ movePerSecondLabel.grid(row = 0, column = 0, sticky = "ne")
 moveTotalLabel = tk.Label(root, text = "")
 moveTotalLabel.grid(row = 0, column = 0, sticky = "nw")
 
-solved = False
+timeTakenLabel = tk.Label(root, text = "")
+timeTakenLabel.grid(row = 0, column = 0, sticky = "n")
+
+solved = False # Check if puzzle is solved
+startSolving = False # Check if puzzle has been started
 
 def onListEnter():
     moveList = puzzle.checkListValidity()
@@ -113,45 +117,50 @@ def onMouseEnter(event, object): # TODO: Advanced mousemovement (doesnt need to 
     updateBoard()
 
 def resetBoard():
-        moveTimer.restartTime()
+        moveTimer.resetAll()
         puzzle.scramblePuzzle()
         puzzle.displayPuzzle()
-        updateBoard()
+        updateBoard(reset = True)
 
 boxWidth = 50
 boxSpacing = 1
 puzzleWidth = boxWidth * 4
 
-def updateBoard():
+def updateBoard(reset = False):
     global solved
 
-    solved = True
+    if not solved or reset:
+        solved = True
 
-    for i in range(4):
-        for j in range(4):
-            tileObj = spaceList[i][j]
-            tileObj.value = puzzle.getVal(i, j)
+        for i in range(4):
+            for j in range(4):
+                tileObj = spaceList[i][j]
+                tileObj.value = puzzle.getVal(i, j)
 
-            xPos = ((canvas.winfo_width() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.col) + boxSpacing)
-            yPos = ((canvas.winfo_height() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.row) + boxSpacing)
+                xPos = ((canvas.winfo_width() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.col) + boxSpacing)
+                yPos = ((canvas.winfo_height() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.row) + boxSpacing)
 
-            canvas.coords(tileObj.canvas_id, xPos, yPos, xPos + boxWidth, yPos + boxWidth)
-            canvas.coords(tileObj.text_id, xPos + boxWidth / 2, yPos + boxWidth / 2)
+                canvas.coords(tileObj.canvas_id, xPos, yPos, xPos + boxWidth, yPos + boxWidth)
+                canvas.coords(tileObj.text_id, xPos + boxWidth / 2, yPos + boxWidth / 2)
 
-            displayValue = int(tileObj.value, 16)
+                displayValue = int(tileObj.value, 16)
 
-            if tileObj.value == "0": # its an int now not a string
-                canvas.itemconfigure(tileObj.canvas_id, fill = "black")
-                canvas.itemconfigure(tileObj.text_id, text = "")
-            else:
-                if tileObj.ID == displayValue:
-                    canvas.itemconfigure(tileObj.canvas_id, fill = "orange", outline = "white")
+                if tileObj.value == "0": # its an int now not a string
+                    canvas.itemconfigure(tileObj.canvas_id, fill = "black")
+                    canvas.itemconfigure(tileObj.text_id, text = "")
                 else:
-                    solved = False
-                    canvas.itemconfigure(tileObj.canvas_id, fill = "blue", outline = "white")
+                    if tileObj.ID == displayValue:
+                        canvas.itemconfigure(tileObj.canvas_id, fill = "orange", outline = "white")
+                    else:
+                        solved = False
+                        canvas.itemconfigure(tileObj.canvas_id, fill = "blue", outline = "white")
 
-                canvas.itemconfigure(tileObj.text_id, text = displayValue)
-                # canvas.itemconfigure(tileObj.text_id, text = tileObj.ID) # Show something instead of Value
+                    canvas.itemconfigure(tileObj.text_id, text = displayValue)
+                    # canvas.itemconfigure(tileObj.text_id, text = tileObj.ID) # Show something instead of Value
+        if solved:
+            allMoves = [move.direction for move in moveTimer.getMovesHistory()]
+            print(f"It took you {moveTimer.getNumMoves()} to solve this puzzle in ___ seconds. The sequence you took is:")
+            print(*allMoves, sep = "")
 
 spaceList = [
     [],
@@ -195,19 +204,22 @@ for i in range(4): # TODO: change to be flexible between puzzle sizes
 
 
 
-def updateMPS():
+def updateInfo():
     movesPerSecond = moveTimer.getMPS()
-    movesTotal = moveTimer.getMoves()
+    movesTotal = moveTimer.getNumMoves()
+    timeTaken = moveTimer.getTime()
 
     movePerSecondLabel.config(text = f"MPS: {movesPerSecond}")
     moveTotalLabel.config(text = f"Moves: {movesTotal}")
+    timeTakenLabel.config(text = f"Time: {timeTaken}")
+
     updateBoard()
 
-    root.after(100, updateMPS)  # Call as often as possible (every ~1ms)
+    root.after(100, updateInfo)  # Call as often as possible (every ~1ms)
 
 # Initial setup
 resetBoard()
 updateBoard()
-updateMPS()
+updateInfo()
 
 root.mainloop()
