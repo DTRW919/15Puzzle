@@ -27,7 +27,7 @@ class Stats:
 
     def getTime(self):
         if self.solving:
-            self.timeTaken = round(time.time() - startTime, 3)
+            self.timeTaken = round(time.time() - self.startTime, 3)
 
         return self.timeTaken
 
