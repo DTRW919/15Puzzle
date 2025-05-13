@@ -17,8 +17,13 @@ class Tile:
         self.x = 0
         self.y = 0
 
-    def getVal(self):
-        return self.value
+    def getVal(self, otherValue = None):
+        if not otherValue:
+            return self.value
+        elif otherValue == "row":
+            return self.row
+        elif otherValue == "col":
+            return self.col
 
 def moveConverter(moveOrID):
     moveToID = {
@@ -63,6 +68,12 @@ def onResize(event):
             canvas.coords(tileObj.canvas_id, xPos, yPos, xPos + boxWidth, yPos + boxWidth)
             canvas.coords(tileObj.text_id, xPos + boxWidth / 2, yPos + boxWidth / 2)
 
+def onAdvancedToggle():
+    print(f"Toggled Advanced Mode {advanced.get()}")
+
+def getAdvanced():
+    return advanced.get()
+
 root = tk.Tk()
 canvas = tk.Canvas(root, width = 800, height = 400, bg = "black")
 canvas.grid(row = 1, column = 0, sticky = "nsew")
@@ -87,6 +98,10 @@ moveTotalLabel.grid(row = 0, column = 0, sticky = "nw")
 timeTakenLabel = tk.Label(root, text = "")
 timeTakenLabel.grid(row = 0, column = 0, sticky = "n")
 
+advanced = tk.BooleanVar() # Advanced boolean
+advancedToggle = tk.Checkbutton(root, text = "Advanced Mode?", variable = advanced, command = onAdvancedToggle)
+advancedToggle.grid(row = 2, column = 0, sticky = "se")
+
 solved = False # Check if puzzle is solved
 startSolving = False # Check if puzzle has been started
 
@@ -96,7 +111,7 @@ def onListEnter():
     moveList = puzzle.checkListValidity()
     print("The move list contains:", moveList)
     for move in list(moveList):
-        puzzle.moveTile(moveConverter(move))
+        puzzle.moveTile(moveConverter(move), getAdvanced())
         stats.addMove(move)
     updateBoard()
 
@@ -105,16 +120,16 @@ def onKeyPress(key):
 
     if not solved:
         if key == "Up" or key == "w":
-            stats.addMove(puzzle.moveTile("up"))
+            stats.addMove(puzzle.moveTile("up", getAdvanced()))
 
         if key == "Down" or key == "s":
-            stats.addMove(puzzle.moveTile("down"))
+            stats.addMove(puzzle.moveTile("down", getAdvanced()))
 
         if key == "Left" or key == "a":
-            stats.addMove(puzzle.moveTile("left"))
+            stats.addMove(puzzle.moveTile("left", getAdvanced()))
 
         if key == "Right" or key == "d":
-            stats.addMove(puzzle.moveTile("right"))
+            stats.addMove(puzzle.moveTile("right", getAdvanced()))
 
     updateBoard()
 
@@ -122,12 +137,12 @@ def onMouseEnter(event, object): # TODO: Advanced mousemovement (doesnt need to 
     global solved
 
     if not solved:
-        currentMove = moveConverter(puzzle.getMove(object.getVal()))
+        currentMove = moveConverter(puzzle.getMove(object.getVal(), getAdvanced()))
 
         if currentMove != None:
             stats.addMove(currentMove)
 
-        puzzle.moveTile(puzzle.getMove(object.getVal()))
+        puzzle.moveTile(puzzle.getMove(object.getVal(), getAdvanced()), getAdvanced(), object.getVal("col"), object.getVal("row"))
 
     updateBoard()
 
@@ -137,7 +152,7 @@ def resetBoard():
         puzzle.displayPuzzle()
         updateBoard(reset = True)
 
-boxWidth = 50
+boxWidth = 100
 boxSpacing = 1
 puzzleWidth = boxWidth * 4
 
@@ -213,7 +228,8 @@ for i in range(4): # TODO: change to be flexible between puzzle sizes
         tileObj.text_id = canvas.create_text(
             xPos + boxWidth / 2,
             tileObj.y + boxWidth / 2,
-            text = tileObj.getVal()
+            text = tileObj.getVal(),
+            font = ("SF Pro", 50)
         )
 
         canvas.tag_bind(tileObj.canvas_id, "<Enter>", lambda e, o = tileObj: onMouseEnter(e, o))

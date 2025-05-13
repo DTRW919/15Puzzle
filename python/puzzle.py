@@ -48,20 +48,33 @@ def getVal(y, x):
 
     return value
 
-def getMove(target): # Checks if adjacent to empty tile
+def getMove(target, advanced = False): # Checks if adjacent to empty tile
     zeroY, zeroX = findTile("0")
     targetY, targetX = findTile(target)
 
-    if zeroX == targetX:
-        if zeroY - targetY == 1:
-            return "down"
-        if zeroY - targetY == -1:
-            return "up"
-    if zeroY == targetY:
-        if zeroX - targetX == 1:
-            return "right"
-        if zeroX - targetX == -1:
-            return "left"
+    if not advanced:
+        if zeroX == targetX:
+            if zeroY - targetY == 1:
+                return "down"
+            if zeroY - targetY == -1:
+                return "up"
+        if zeroY == targetY:
+            if zeroX - targetX == 1:
+                return "right"
+            if zeroX - targetX == -1:
+                return "left"
+    else:
+        if zeroX == targetX:
+            if zeroY > targetY:
+                return "down"
+            if zeroY < targetY:
+                return "up"
+        if zeroY == targetY:
+            if zeroX > targetX:
+                return "right"
+            if zeroX < targetX:
+                return "left"
+
     return "invalid"
 
 def setTile(y, x, val = "0"): # Defaults to 0
@@ -75,7 +88,7 @@ def findTile(target, puzzle = puzzle):
     print("Error: target not found")
     return -1, -1
 
-def moveTile(move, advanced = False):
+def moveTile(move, advanced = False, tileLocX = 0, tileLocY = 0): # tileLoc is the location of the target tile
     locY, locX = findTile("0") # Location of empty tile
 
     if not advanced:
@@ -98,6 +111,26 @@ def moveTile(move, advanced = False):
             setTile(locY, locX, getVal(locY, locX - 1))
             setTile(locY, locX - 1)
             return "d"
+    else:
+        if move == "up":
+            for i in range(tileLocY - locY):
+                setTile(locY + i, locX, getVal(locY + i + 1, locX))
+            setTile(tileLocY, tileLocX)
+
+        if move == "down":
+            for i in range(locY - tileLocY):
+                setTile(locY - i, locX, getVal(locY - i - 1, locX))
+            setTile(tileLocY, tileLocX)
+
+        if move == "left":
+            for i in range(tileLocX - locX):
+                setTile(locY, locX + i, getVal(locY, locX + i + 1))
+            setTile(tileLocY, tileLocX)
+
+        if move == "right":
+            for i in range(locX - tileLocX):
+                setTile(locY, locX - i, getVal(locY, locX - i - 1))
+            setTile(tileLocY, tileLocX)
 
     return ""
 
