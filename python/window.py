@@ -77,12 +77,14 @@ timeTakenLabel.grid(row = 0, column = 0, sticky = "n")
 solved = False # Check if puzzle is solved
 startSolving = False # Check if puzzle has been started
 
+stats = moveTimer.Stats()
+
 def onListEnter():
     moveList = puzzle.checkListValidity()
     print("The move list contains:", moveList)
     for move in list(moveList):
         puzzle.moveTile(moveConverter(move))
-        moveTimer.addMove(move)
+        stats.addMove(move)
     updateBoard()
 
 def onKeyPress(key):
@@ -90,16 +92,16 @@ def onKeyPress(key):
 
     if not solved:
         if key == "Up" or key == "w":
-            moveTimer.addMove(puzzle.moveTile("up"))
+            stats.addMove(puzzle.moveTile("up"))
 
         if key == "Down" or key == "s":
-            moveTimer.addMove(puzzle.moveTile("down"))
+            stats.addMove(puzzle.moveTile("down"))
 
         if key == "Left" or key == "a":
-            moveTimer.addMove(puzzle.moveTile("left"))
+            stats.addMove(puzzle.moveTile("left"))
 
         if key == "Right" or key == "d":
-            moveTimer.addMove(puzzle.moveTile("right"))
+            stats.addMove(puzzle.moveTile("right"))
 
     updateBoard()
 
@@ -110,14 +112,14 @@ def onMouseEnter(event, object): # TODO: Advanced mousemovement (doesnt need to 
         currentMove = moveConverter(puzzle.getMove(object.getVal()))
 
         if currentMove != None:
-            moveTimer.addMove(currentMove)
+            stats.addMove(currentMove)
 
         puzzle.moveTile(puzzle.getMove(object.getVal()))
 
     updateBoard()
 
 def resetBoard():
-        moveTimer.resetAll()
+        stats.resetAll()
         puzzle.scramblePuzzle()
         puzzle.displayPuzzle()
         updateBoard(reset = True)
@@ -158,8 +160,9 @@ def updateBoard(reset = False):
                     canvas.itemconfigure(tileObj.text_id, text = displayValue)
                     # canvas.itemconfigure(tileObj.text_id, text = tileObj.ID) # Show something instead of Value
         if solved:
-            allMoves = [move.direction for move in moveTimer.getMovesHistory()]
-            print(f"It took you {moveTimer.getNumMoves()} to solve this puzzle in ___ seconds. The sequence you took is:")
+            stats.setSolving(False)
+            allMoves = [move.direction for move in stats.getMovesHistory()]
+            print(f"It took you {stats.getNumMoves()} to solve this puzzle in ___ seconds. The sequence you took is:")
             print(*allMoves, sep = "")
 
 spaceList = [
@@ -205,9 +208,9 @@ for i in range(4): # TODO: change to be flexible between puzzle sizes
 
 
 def updateInfo():
-    movesPerSecond = moveTimer.getMPS()
-    movesTotal = moveTimer.getNumMoves()
-    timeTaken = moveTimer.getTime()
+    movesPerSecond = stats.getMPS()
+    movesTotal = stats.getNumMoves()
+    timeTaken = stats.getTime()
 
     movePerSecondLabel.config(text = f"MPS: {movesPerSecond}")
     moveTotalLabel.config(text = f"Moves: {movesTotal}")
@@ -215,7 +218,7 @@ def updateInfo():
 
     updateBoard()
 
-    root.after(100, updateInfo)  # Call as often as possible (every ~1ms)
+    root.after(20, updateInfo)  # Call as often as possible (every ~1ms)
 
 # Initial setup
 resetBoard()

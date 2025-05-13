@@ -3,52 +3,54 @@ import time
 movesHistory = []
 movesPerSecond = 0.0
 startTime = time.time()
+timeTaken = 0.0
+
+solving = False # Not boolean; if 0.0 then not solving if not thent represents time taken to solve
 
 class Move:
     def __init__(self, direction):
         self.timestamp = time.time()
         self.direction = direction
 
-def resetAll():
-    global movesHistory
-    global movesPerSecond
-    global startTime
+class Stats:
+    def __init__(self):
+        self.resetAll()
 
-    movesHistory = []
-    movesPerSecond = 0.0
-    startTime = time.time()
+    def resetAll(self):
+        self.movesHistory = []
+        self.movesPerSecond = 0.0
+        self.startTime = time.time()
+        self.solving = False
+        self.timeTaken = 0.0
 
-def getTime():
-    global startTime
+    def setSolving(self, state):
+        self.solving = state
 
-    return round(time.time() - startTime, 3)
+    def getTime(self):
+        if self.solving:
+            self.timeTaken = round(time.time() - startTime, 3)
 
-def checkMoveHistory():
-    global movesHistory
+        return self.timeTaken
 
-    movesHistory = [entry for entry in movesHistory if entry.direction != ""]
+    def checkMoveHistory(self):
+        self.movesHistory = [entry for entry in self.movesHistory if entry.direction != ""]
 
-def addMove(direction):
-    global movesHistory
+    def addMove(self, direction):
+        self.movesHistory.append(Move(direction))
 
-    movesHistory.append(Move(direction))
+        if not self.solving: # Temporary check, this is dusgusting
+            self.solving = True
 
-def getNumMoves():
-    global movesHistory
+    def getNumMoves(self):
+        return len(self.movesHistory)
 
-    return len(movesHistory)
+    def getMovesHistory(self):
+        return self.movesHistory
 
-def getMovesHistory():
-    global movesHistory
+    def getMPS(self):
+        self.checkMoveHistory()
 
-    return movesHistory
+        currentTime = time.time()
+        lastSecond = [entry for entry in self.movesHistory if currentTime - entry.timestamp <= 1]
 
-def getMPS():
-    global movesHistory
-
-    checkMoveHistory()
-
-    currentTime = time.time()
-    lastSecond = [entry for entry in movesHistory if currentTime - entry.timestamp <= 1]
-
-    return len(lastSecond)
+        return len(lastSecond)
