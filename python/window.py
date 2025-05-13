@@ -3,10 +3,13 @@ import puzzle
 import moveTimer
 
 class Tile:
-    def __init__(self, ID, value = 0, color = "gray"):
+    def __init__(self, ID, value = 0, color = "gray", row = 0, col = 0):
         self.ID = ID
         self.color = color
         self.value = value
+
+        self.row = row
+        self.col = col
 
         self.canvas_id = None
         self.text_id = None
@@ -51,15 +54,22 @@ def keyChecker(event):
 
 root = tk.Tk()
 canvas = tk.Canvas(root, width = 800, height = 400, bg = "black")
-canvas.grid(row = 1, column = 0)
+canvas.grid(row = 1, column = 0, sticky = "nsew")
 root.bind("<KeyPress>", keyChecker)
+
+root.grid_columnconfigure(0, weight = 1)
+root.grid_rowconfigure(1, weight = 1)
+
+# root.grid_rowconfigure(1, weight = 1)
+# root.grid_columnconfigure(1, weight = 1)
+
 canvas.focus_set()
 
 movePerSecondLabel = tk.Label(root, text = "")
-movePerSecondLabel.grid(row = 0, column = 0, sticky = "se")
+movePerSecondLabel.grid(row = 0, column = 0, sticky = "ne")
 
 moveTotalLabel = tk.Label(root, text = "")
-moveTotalLabel.grid(row = 0, column = 0, sticky = "sw")
+moveTotalLabel.grid(row = 0, column = 0, sticky = "nw")
 
 solved = False
 
@@ -108,6 +118,10 @@ def resetBoard():
         puzzle.displayPuzzle()
         updateBoard()
 
+boxWidth = 50
+boxSpacing = 1
+puzzleWidth = boxWidth * 4
+
 def updateBoard():
     global solved
 
@@ -117,10 +131,17 @@ def updateBoard():
         for j in range(4):
             tileObj = spaceList[i][j]
             tileObj.value = puzzle.getVal(i, j)
+
+            xPos = ((canvas.winfo_width() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.col) + boxSpacing)
+            yPos = ((canvas.winfo_height() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.row) + boxSpacing)
+
+            canvas.coords(tileObj.canvas_id, xPos, yPos, xPos + boxWidth, yPos + boxWidth)
+            canvas.coords(tileObj.text_id, xPos + boxWidth / 2, yPos + boxWidth / 2)
+
             displayValue = int(tileObj.value, 16)
 
             if tileObj.value == "0": # its an int now not a string
-                canvas.itemconfigure(tileObj.canvas_id, fill = "black", outline = "black")
+                canvas.itemconfigure(tileObj.canvas_id, fill = "black")
                 canvas.itemconfigure(tileObj.text_id, text = "")
             else:
                 if tileObj.ID == displayValue:
@@ -130,11 +151,7 @@ def updateBoard():
                     canvas.itemconfigure(tileObj.canvas_id, fill = "blue", outline = "white")
 
                 canvas.itemconfigure(tileObj.text_id, text = displayValue)
-                # canvas.itemconfigure(tileObj.text_id, text = tileObj.ID) # Show ID instead of Value
-
-
-length = 50
-space = length + 1
+                # canvas.itemconfigure(tileObj.text_id, text = tileObj.ID) # Show something instead of Value
 
 spaceList = [
     [],
@@ -145,22 +162,32 @@ spaceList = [
 
 for i in range(4): # TODO: change to be flexible between puzzle sizes
     for j in range(4):
-        spaceList[i].append(Tile((i * 4) + j + 1))
+        spaceList[i].append(Tile((i * 4) + j + 1, row = i, col = j))
 
         tileObj = spaceList[i][j]
 
-        tileObj.x = j * space
-        tileObj.y = i * space
+        tileObj.x = j * (boxSpacing + boxWidth)
+        tileObj.y = i * (boxSpacing + boxWidth)
+
+        # tileObj.canvas_id = canvas.create_rectangle(
+        #     tileObj.x, tileObj.y,
+        #     tileObj.x + boxWidth,
+        #     tileObj.y + boxWidth,
+        #     fill = "blue"
+        # )
+
+        xPos = ((root.winfo_width() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.col) + boxSpacing)
+        yPos = ((root.winfo_height() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.row) + boxSpacing)
 
         tileObj.canvas_id = canvas.create_rectangle(
-            tileObj.x, tileObj.y,
-            tileObj.x + length,
-            tileObj.y + length,
+            xPos, tileObj.y,
+            xPos + boxWidth, tileObj.y + boxWidth,
             fill = "blue"
         )
+
         tileObj.text_id = canvas.create_text(
-            tileObj.x + length / 2,
-            tileObj.y + length / 2,
+            xPos + boxWidth / 2,
+            tileObj.y + boxWidth / 2,
             text = tileObj.getVal()
         )
 
@@ -175,6 +202,7 @@ def updateMPS():
     movePerSecondLabel.config(text = f"MPS: {movesPerSecond}")
     moveTotalLabel.config(text = f"Moves: {movesTotal}")
     updateBoard()
+
     root.after(100, updateMPS)  # Call as often as possible (every ~1ms)
 
 # Initial setup

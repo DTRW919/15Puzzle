@@ -39,7 +39,4 @@ def getMPS():
     currentTime = time.time()
     lastSecond = [entry for entry in movesHistory if currentTime - entry.timestamp <= 1]
 
-    temp = [move.direction for move in movesHistory]
-    print(temp)
-
     return len(lastSecond)
