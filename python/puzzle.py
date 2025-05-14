@@ -13,6 +13,9 @@ class Puzzle:
         self.solved = True
         self.startedSolve = False
 
+        self.zeroY = -1
+        self.zeroX = -1
+
         self.constants = constants.Constants()
 
         self.scramblePuzzle()
@@ -53,93 +56,107 @@ class Puzzle:
     def getMove(self, targetY, targetX):
         advanced = self.constants.getConstant("tiles.advanced")
 
-        zeroY, zeroX = self.findTarget("0")
+        self.zeroY, self.zeroX = self.findTarget("0")
 
         if not advanced:
-            if zeroX == targetX:
-                if zeroY - targetY == 1:
+            if self.zeroX == targetX:
+                if self.zeroY - targetY == 1:
                     return "down"
-                if zeroY - targetY == -1:
+                if self.zeroY - targetY == -1:
                     return "up"
-            if zeroY == targetY:
-                if zeroX - targetX == 1:
+            if self.zeroY == targetY:
+                if self.zeroX - targetX == 1:
                     return "right"
-                if zeroX - targetX == -1:
+                if self.zeroX - targetX == -1:
                     return "left"
         else:
-            if zeroX == targetX:
-                if zeroY > targetY:
+            if self.zeroX == targetX:
+                if self.zeroY > targetY:
                     return "down"
-                if zeroY < targetY:
+                if self.zeroY < targetY:
                     return "up"
-            if zeroY == targetY:
-                if zeroX > targetX:
+            if self.zeroY == targetY:
+                if self.zeroX > targetX:
                     return "right"
-                if zeroX < targetX:
+                if self.zeroX < targetX:
                     return "left"
 
         return "invalid"
 
     def setTarget(self, targetY, targetX, val = "0"):
+        if val == "0":
+            self.zeroY = targetY
+            self.zeroX = targetX
+
         self.puzzle[targetY][targetX] = val
 
-    def moveTarget(self, move, targetY = -1, targetX = -1):
-        returnString = "" # Defaults to no valid move
-
-        advanced = self.constants.getConstant("tiles.advanced")
-
-        zeroY, zeroX = self.findTarget()
-
-        if not advanced or (targetY == -1 and targetX == -1):
-            if move == "up" and zeroY != len(self.puzzle) - 1:
-                self.setTarget(zeroY, zeroX, self.getPosVal(zeroY + 1, zeroX))
-                self.setTarget(zeroY + 1, zeroX)
-                returnString = "w"
-
-            if move == "down" and zeroY != 0:
-                self.setTarget(zeroY, zeroX, self.getPosVal(zeroY - 1, zeroX))
-                self.setTarget(zeroY - 1, zeroX)
-                returnString = "s"
-
-            if move == "left" and zeroX != len(self.puzzle[0]) - 1:
-                self.setTarget(zeroY, zeroX, self.getPosVal(zeroY, zeroX + 1))
-                self.setTarget(zeroY, zeroX + 1)
-                returnString = "a"
-
-            if move == "right" and zeroX != 0:
-                self.setTarget(zeroY, zeroX, self.getPosVal(zeroY, zeroX - 1))
-                self.setTarget(zeroY, zeroX - 1)
-                returnString = "d"
-
+    def moveUp(self, target, advanced = False):
+        if not advanced:
+            if self.zeroY != len(self.puzzle) - 1:
+                self.setTarget(self.zeroY, self.zeroX, self.getPosVal(self.zeroY + 1, self.zeroX))
+                self.setTarget(self.zeroY + 1, self.zeroX)
+                return "w"
         else:
+            self.setTarget(self.zeroY + target, self.zeroX, self.getPosVal(self.zeroY + target + 1, self.zeroX))
+            return "w"
 
-            if move == "up":
-                for i in range(targetY - zeroY):
-                    self.setTarget(zeroY + i, zeroX, self.getPosVal(zeroY + i + 1, zeroX))
-                    returnString += "w"
-                self.setTarget(targetY, targetX)
+    def moveDown(self, target, advanced = False):
+        if not advanced:
+            if self.zeroY != 0:
+                self.setTarget(self.zeroY, self.zeroX, self.getPosVal(self.zeroY - 1, self.zeroX))
+                self.setTarget(self.zeroY - 1, self.zeroX)
+                return "s"
+        else:
+            self.setTarget(self.zeroY - target, self.zeroX, self.getPosVal(self.zeroY - target - 1, self.zeroX))
+            return "s"
 
-            if move == "down":
-                for i in range(zeroY - targetY):
-                    self.setTarget(zeroY - i, zeroX, self.getPosVal(zeroY - i - 1, zeroX))
-                    returnString += "s"
-                self.setTarget(targetY, targetX)
+    def moveLeft(self, target, advanced = False):
+        if not advanced:
+            if self.zeroX != len(self.puzzle[0]) - 1:
+                self.setTarget(self.zeroY, self.zeroX, self.getPosVal(self.zeroY, self.zeroX + 1))
+                self.setTarget(self.zeroY, self.zeroX + 1)
+                return "a"
+        else:
+            self.setTarget(self.zeroY, self.zeroX + target, self.getPosVal(self.zeroY, self.zeroX + target + 1))
+            return "a"
 
-            if move == "left":
-                for i in range(targetX - zeroX):
-                    self.setTarget(zeroY, zeroX + i, self.getPosVal(zeroY, zeroX + i + 1))
-                    returnString += "a"
-                self.setTarget(targetY, targetX)
+    def moveRight(self, target, advanced = False):
+        if not advanced:
+            if self.zeroX != 0:
+                self.setTarget(self.zeroY, self.zeroX, self.getPosVal(self.zeroY, self.zeroX - 1))
+                self.setTarget(self.zeroY, self.zeroX - 1)
+                return "d"
+        else:
+            self.setTarget(self.zeroY, self.zeroX - target, self.getPosVal(self.zeroY, self.zeroX - target - 1))
+            return "d"
 
-            if move == "right":
-                for i in range(zeroX - targetX):
-                    self.setTarget(zeroY, zeroX - i, self.getPosVal(zeroY, zeroX - i - 1))
-                    returnString += "d"
-                self.setTarget(targetY, targetX)
+    def moveTarget(self, move, targetY = -1, targetX = -1):
+        self.zeroY, self.zeroX = self.findTarget() # Find location of empty tile
+        advanced = self.constants.getConstant("tiles.advanced")
+        returnString = ""
 
-        if not self.getStarted() and returnString != "":
+        if move == "up":
+            for i in range(targetY - self.zeroY):
+                returnString += self.moveUp(i, advanced)
+            self.setTarget(targetY, targetX) # Set empty tile
+
+        if move == "down":
+            for i in range(self.zeroY - targetY):
+                returnString += self.moveDown(i, advanced)
+            self.setTarget(targetY, targetX) # Set empty tile
+
+        if move == "left":
+            for i in range(targetX - self.zeroX):
+                returnString += self.moveLeft(i, advanced)
+            self.setTarget(targetY, targetX) # Set empty tile
+
+        if move == "right":
+            for i in range(self.zeroX - targetX):
+                returnString += self.moveRight(i, advanced)
+            self.setTarget(targetY, targetX)
+
+        if returnString != "" and not self.getStarted():
             self.setStarted(True)
-
         return returnString
 
     def scramblePuzzle(self):

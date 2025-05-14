@@ -161,7 +161,6 @@ class Window:
                 self.stats.resetAll()
 
     def onMouseEnter(self, event, tileObj):
-        # allegedMove = self.puzzle.getMove(self.puzzle.findTarget(tileObj.value))
         targetPos = self.puzzle.findTarget(tileObj.value)
         allegedMove = self.puzzle.getMove(targetPos[0], targetPos[1])
 
