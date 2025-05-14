@@ -39,7 +39,7 @@ class Window:
                     0, 0,
                     text = tileObj.getAttribute(),
                     fill = "white",
-                    font = ("SF Pro", 25, "bold"),
+                    font = ("SF Pro", 50, "bold"),
                 )
 
                 self.canvas.tag_bind( # Bind mouse detection to each tile
