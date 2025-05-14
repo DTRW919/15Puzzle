@@ -10,19 +10,23 @@ class Statistics:
             self.direction = direction
 
     def resetAll(self):
-        self.started = False
+        self.solving = False
         self.movesHistory = []
         self.movesPerSecond = 0.0
         self.startTime = 0.0
         self.timeTaken = 0.0
 
     def startTracking(self):
-        if not self.started:
-            self.started = True
+        if not self.solving:
+            self.solving = True
             self.startTime = time.time()
 
+    def stopTracking(self): # Maybe not used
+        if self.solving:
+            self.solving = False
+
     def getTime(self):
-        if self.started:
+        if self.solving:
             self.timeTaken = round(time.time() - self.startTime, 3)
 
         return self.timeTaken

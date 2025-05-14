@@ -25,6 +25,9 @@ class Window:
 
                 tileObj = self.tileList[i][j]
 
+                if tileObj.ID == 16:
+                    tileObj.ID = 0
+
                 tileObj.canvas_id = self.canvas.create_rectangle(
                     0, 0, 0, 0,
                     fill = "blue",
@@ -36,7 +39,7 @@ class Window:
                     0, 0,
                     text = tileObj.getAttribute(),
                     fill = "white",
-                    font = ("SF Pro", 50, "bold"),
+                    font = ("SF Pro", 25, "bold"),
                 )
 
                 self.canvas.tag_bind( # Bind mouse detection to each tile
@@ -52,7 +55,7 @@ class Window:
         self.timeTakenLabel = tkinter.Label(self.root, text = "3")
         self.timeTakenLabel.grid(row = 0, sticky = "n")
 
-        self.started = False
+        self.solving = False
 
         self.periodic() # Initial periodic function
 
@@ -154,6 +157,8 @@ class Window:
         elif key in settingKeys:
             if key == "space":
                 self.puzzle.scramblePuzzle()
+                self.solving = False
+                self.stats.resetAll()
 
     def onMouseEnter(self, event, tileObj):
         # allegedMove = self.puzzle.getMove(self.puzzle.findTarget(tileObj.value))
@@ -162,6 +167,15 @@ class Window:
 
         if allegedMove != "invald":
             self.stats.addMove(self.puzzle.moveTarget(allegedMove, targetPos[0], targetPos[1]))
+
+    def isSolved(self):
+        for i in range(4):
+            for j in range(4):
+                tileObj = self.tileList[i][j]
+
+                if tileObj.display != tileObj.ID:
+                    return False
+        return True
 
     def updateTiles(self):
         for i in range(4):
@@ -176,24 +190,25 @@ class Window:
                 self.canvas.itemconfigure(tileObj.text_id, text = tileObj.display, fill = tileObj.textColor)
 
     def updateInfo(self):
-        movesPerSecond = self.stats.getMPS()
-        movesTotal = self.stats.getNumMoves()
-        timeTaken = self.stats.getTime()
+        if not self.isSolved():
+            movesPerSecond = self.stats.getMPS()
+            movesTotal = self.stats.getNumMoves()
+            timeTaken = self.stats.getTime()
 
-        self.movesPerSecondLabel.config(text = f"MPS: {movesPerSecond}")
-        self.movesTotalLabel.config(text = f"Moves: {movesTotal}")
-        self.timeTakenLabel.config(text = f"Time: {timeTaken}")
+            self.movesPerSecondLabel.config(text = f"MPS: {movesPerSecond}")
+            self.movesTotalLabel.config(text = f"Moves: {movesTotal}")
+            self.timeTakenLabel.config(text = f"Time: {timeTaken}")
 
     def periodic(self):
         self.updateTiles()
         self.updateInfo()
 
-        if self.puzzle.getStarted() and not self.started:
+        if self.puzzle.getStarted() and not self.solving:
             self.stats.startTracking()
-            self.started = True
+            self.solving = True
 
-        if not self.puzzle.getStarted() and self.started:
-            self.stats.resetAll()
-            self.started = False
+        if self.solving and self.isSolved():
+            self.stats.stopTracking()
+            self.solving = False
 
         self.root.after(20, self.periodic) # Recursively call every 20ms
