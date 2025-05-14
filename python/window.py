@@ -203,12 +203,14 @@ class Window:
         self.updateTiles()
         self.updateInfo()
 
-        if self.puzzle.getStarted() and not self.solving:
+        if self.puzzle.getStarted() and not self.solving: # Started solving...
             self.stats.startTracking()
             self.solving = True
 
-        if self.solving and self.isSolved():
+        if self.solving and self.isSolved(): # It's solved!
             self.stats.stopTracking()
+            self.puzzle.setStarted(False) # TODO: Do this in puzzle.py not here
             self.solving = False
+            self.stats.printMoves()
 
         self.root.after(20, self.periodic) # Recursively call every 20ms
