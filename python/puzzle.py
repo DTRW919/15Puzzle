@@ -1,7 +1,6 @@
 import random
 import constants
 
-
 class Puzzle:
     def __init__(self):
         self.puzzle = [
@@ -17,6 +16,12 @@ class Puzzle:
         self.constants = constants.Constants()
 
         self.scramblePuzzle()
+
+    def getStarted(self):
+        return self.startedSolve
+
+    def setStarted(self, state):
+        self.startedSolve = state
 
     def inputValidity(self, options = [], prompt = ""):
         userInput = None
@@ -79,6 +84,8 @@ class Puzzle:
         self.puzzle[targetY][targetX] = val
 
     def moveTarget(self, move, targetY = -1, targetX = -1):
+        returnString = "" # Defaults to no valid move
+
         advanced = self.constants.getConstant("tiles.advanced")
 
         zeroY, zeroX = self.findTarget()
@@ -87,38 +94,53 @@ class Puzzle:
             if move == "up" and zeroY != len(self.puzzle) - 1:
                 self.setTarget(zeroY, zeroX, self.getPosVal(zeroY + 1, zeroX))
                 self.setTarget(zeroY + 1, zeroX)
+                returnString = "w"
 
             if move == "down" and zeroY != 0:
                 self.setTarget(zeroY, zeroX, self.getPosVal(zeroY - 1, zeroX))
                 self.setTarget(zeroY - 1, zeroX)
+                returnString = "s"
 
             if move == "left" and zeroX != len(self.puzzle[0]) - 1:
                 self.setTarget(zeroY, zeroX, self.getPosVal(zeroY, zeroX + 1))
                 self.setTarget(zeroY, zeroX + 1)
+                returnString = "a"
 
             if move == "right" and zeroX != 0:
                 self.setTarget(zeroY, zeroX, self.getPosVal(zeroY, zeroX - 1))
                 self.setTarget(zeroY, zeroX - 1)
+                returnString = "d"
+
         else:
+
             if move == "up":
                 for i in range(targetY - zeroY):
                     self.setTarget(zeroY + i, zeroX, self.getPosVal(zeroY + i + 1, zeroX))
+                    returnString += "w"
                 self.setTarget(targetY, targetX)
 
             if move == "down":
                 for i in range(zeroY - targetY):
                     self.setTarget(zeroY - i, zeroX, self.getPosVal(zeroY - i - 1, zeroX))
+                    returnString += "s"
                 self.setTarget(targetY, targetX)
 
             if move == "left":
                 for i in range(targetX - zeroX):
                     self.setTarget(zeroY, zeroX + i, self.getPosVal(zeroY, zeroX + i + 1))
+                    returnString += "a"
                 self.setTarget(targetY, targetX)
 
             if move == "right":
                 for i in range(zeroX - targetX):
                     self.setTarget(zeroY, zeroX - i, self.getPosVal(zeroY, zeroX - i - 1))
+                    returnString += "d"
                 self.setTarget(targetY, targetX)
+
+        if not self.getStarted() and returnString != "":
+            self.setStarted(True)
+
+        return returnString
 
     def scramblePuzzle(self):
         print("Resetting puzzle...")
@@ -157,3 +179,5 @@ class Puzzle:
             for row in range(4):
                 for col in range(4):
                     self.puzzle[row][col] = hex(flatPuzzle[(row * 4) + col]).upper()[2 :]
+
+        self.setStarted(False)

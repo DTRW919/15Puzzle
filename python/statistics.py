@@ -1,32 +1,28 @@
 import time
 
-movesHistory = []
-movesPerSecond = 0.0
-startTime = time.time()
-timeTaken = 0.0
-solving = False
-
-class Move:
-    def __init__(self, direction):
-        self.timestamp = time.time()
-        self.direction = direction
-
-class Stats:
+class Statistics:
     def __init__(self):
         self.resetAll()
 
+    class Move:
+        def __init__(self, direction):
+            self.timestamp = time.time()
+            self.direction = direction
+
     def resetAll(self):
+        self.started = False
         self.movesHistory = []
         self.movesPerSecond = 0.0
-        self.startTime = time.time()
-        self.solving = False
+        self.startTime = 0.0
         self.timeTaken = 0.0
 
-    def setSolving(self, state):
-        self.solving = state
+    def startTracking(self):
+        if not self.started:
+            self.started = True
+            self.startTime = time.time()
 
     def getTime(self):
-        if self.solving:
+        if self.started:
             self.timeTaken = round(time.time() - self.startTime, 3)
 
         return self.timeTaken
@@ -35,10 +31,11 @@ class Stats:
         self.movesHistory = [entry for entry in self.movesHistory if entry.direction != ""]
 
     def addMove(self, direction):
-        self.movesHistory.append(Move(direction))
+        for char in direction:
+            self.movesHistory.append(self.Move(char))
 
-        if not self.solving: # Temporary check, this is dusgusting
-            self.solving = True
+    def printDirections(self):
+        print(*[entry.direction for entry in self.movesHistory], sep = "")
 
     def getNumMoves(self):
         return len(self.movesHistory)

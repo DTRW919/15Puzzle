@@ -1,19 +1,20 @@
 import tkinter
-import moveTimer, constants, puzzle
+import statistics, constants, puzzle
 
 class Window:
     def __init__(self, puzzle: puzzle.Puzzle): # Requires a puzzle to bind to
         self.root = tkinter.Tk()
         self.root.grid_rowconfigure(1, weight = 1)
         self.root.grid_columnconfigure(0, weight = 1)
-        # root.bind("<KeyPress>", keyChecker)
+        self.root.bind("<KeyPress>", self.onKeyPress) # Track and react to key presses
 
         self.canvas = tkinter.Canvas(self.root, width = 800, height = 400, bg = "#000000", highlightthickness = 0)
         self.canvas.grid(row = 1, column = 0, sticky = "nsew")
+        self.canvas.bind("<Configure>", self.onResize) # Track and react to resizing
 
         self.puzzle = puzzle # Reference in constructor
 
-        self.stats = moveTimer.Stats()
+        self.stats = statistics.Statistics()
         self.constants = constants.Constants()
 
         self.tileList = [[], [], [], []]
@@ -44,9 +45,14 @@ class Window:
                     lambda e, o = tileObj: self.onMouseEnter(e, o)
                 )
 
-        self.root.bind("<KeyPress>", self.onKeyPress) # Track and react to key presses
+        self.movesPerSecondLabel = tkinter.Label(self.root, text = "1")
+        self.movesPerSecondLabel.grid(row = 0, sticky = "ne")
+        self.movesTotalLabel = tkinter.Label(self.root, text = "2")
+        self.movesTotalLabel.grid(row = 0, sticky = "nw")
+        self.timeTakenLabel = tkinter.Label(self.root, text = "3")
+        self.timeTakenLabel.grid(row = 0, sticky = "n")
 
-        self.canvas.bind("<Configure>", self.onResize) # Track and react to resizing
+        self.started = False
 
         self.periodic() # Initial periodic function
 
@@ -123,8 +129,8 @@ class Window:
                 tileSpacing = self.constants.getConstant("tiles.tileSpacing")
                 puzzleWidth = (4 * tileWidth)
 
-                xPos = ((self.root.winfo_width() - (puzzleWidth + (3 * tileSpacing))) / 2) + (tileWidth * (tileObj.col) + tileSpacing)
-                yPos = ((self.root.winfo_height() - (puzzleWidth + (3 * tileSpacing))) / 2) + (tileWidth * (tileObj.row) + tileSpacing)
+                xPos = ((self.root.grid_bbox(0, 0)[2] - (puzzleWidth + (3 * tileSpacing))) / 2) + (tileWidth * (tileObj.col) + tileSpacing)
+                yPos = ((self.root.grid_bbox(0, 1)[3] - (puzzleWidth + (3 * tileSpacing))) / 2) + (tileWidth * (tileObj.row) + tileSpacing)
 
                 self.canvas.coords(tileObj.canvas_id, xPos, yPos, xPos + tileWidth, yPos + tileWidth)
                 self.canvas.coords(tileObj.text_id, xPos + (tileWidth / 2), yPos + (tileWidth / 2))
@@ -142,13 +148,12 @@ class Window:
         ]
 
         if key in movementKeys:
-            allegedKey = movementKeys[(int((movementKeys.index(key) + 0.5) / 2)) * 2].lower()
-            self.puzzle.moveTarget(allegedKey)
+            allegedKey = movementKeys[(int((movementKeys.index(key)) / 2)) * 2].lower()
+            self.stats.addMove(self.puzzle.moveTarget(allegedKey))
 
         elif key in settingKeys:
             if key == "space":
                 self.puzzle.scramblePuzzle()
-
 
     def onMouseEnter(self, event, tileObj):
         # allegedMove = self.puzzle.getMove(self.puzzle.findTarget(tileObj.value))
@@ -156,7 +161,7 @@ class Window:
         allegedMove = self.puzzle.getMove(targetPos[0], targetPos[1])
 
         if allegedMove != "invald":
-            self.puzzle.moveTarget(allegedMove, targetPos[0], targetPos[1])
+            self.stats.addMove(self.puzzle.moveTarget(allegedMove, targetPos[0], targetPos[1]))
 
     def updateTiles(self):
         for i in range(4):
@@ -170,11 +175,25 @@ class Window:
                 self.canvas.itemconfigure(tileObj.canvas_id, fill = tileObj.tileColor)
                 self.canvas.itemconfigure(tileObj.text_id, text = tileObj.display, fill = tileObj.textColor)
 
+    def updateInfo(self):
+        movesPerSecond = self.stats.getMPS()
+        movesTotal = self.stats.getNumMoves()
+        timeTaken = self.stats.getTime()
+
+        self.movesPerSecondLabel.config(text = f"MPS: {movesPerSecond}")
+        self.movesTotalLabel.config(text = f"Moves: {movesTotal}")
+        self.timeTakenLabel.config(text = f"Time: {timeTaken}")
+
     def periodic(self):
         self.updateTiles()
+        self.updateInfo()
+
+        if self.puzzle.getStarted() and not self.started:
+            self.stats.startTracking()
+            self.started = True
+
+        if not self.puzzle.getStarted() and self.started:
+            self.stats.resetAll()
+            self.started = False
 
         self.root.after(20, self.periodic) # Recursively call every 20ms
-
-
-
-window = Window(puzzleClass.Puzzle())
