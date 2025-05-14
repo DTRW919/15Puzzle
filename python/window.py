@@ -1,8 +1,8 @@
 import tkinter
-import moveTimer, constants, puzzleClass
+import moveTimer, constants, puzzle
 
 class Window:
-    def __init__(self, puzzle: puzzleClass.Puzzle): # Requires a puzzle to bind to
+    def __init__(self, puzzle: puzzle.Puzzle): # Requires a puzzle to bind to
         self.root = tkinter.Tk()
         self.root.grid_rowconfigure(1, weight = 1)
         self.root.grid_columnconfigure(0, weight = 1)
