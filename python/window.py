@@ -1,279 +1,180 @@
-import tkinter as tk
-import puzzle
-import moveTimer
+import tkinter
+import moveTimer, constants, puzzleClass
 
-class Tile:
-    def __init__(self, ID, value = 0, color = "gray", row = 0, col = 0):
-        self.ID = ID
-        self.color = color
-        self.value = value
+class Window:
+    def __init__(self, puzzle: puzzleClass.Puzzle): # Requires a puzzle to bind to
+        self.root = tkinter.Tk()
+        self.root.grid_rowconfigure(1, weight = 1)
+        self.root.grid_columnconfigure(0, weight = 1)
+        # root.bind("<KeyPress>", keyChecker)
 
-        self.row = row
-        self.col = col
+        self.canvas = tkinter.Canvas(self.root, width = 800, height = 400, bg = "#000000", highlightthickness = 0)
+        self.canvas.grid(row = 1, column = 0, sticky = "nsew")
 
-        self.canvas_id = None
-        self.text_id = None
+        self.puzzle = puzzle # Reference in constructor
 
-        self.x = 0
-        self.y = 0
+        self.stats = moveTimer.Stats()
+        self.constants = constants.Constants()
 
-    def getVal(self, otherValue = None):
-        if not otherValue:
-            return self.value
-        elif otherValue == "row":
-            return self.row
-        elif otherValue == "col":
-            return self.col
+        self.tileList = [[], [], [], []]
 
-def getColor(val):
-    if val in {1, 2, 3, 4}:
-        return "#f5462f"
-    if val in {5, 9, 13}:
-        return "#ffc917"
-    if val in {6, 7, 8}:
-        return "#1eb34b"
-    if val in {10, 14}:
-        return "#3081bf"
-    if val in {11, 12}:
-        return "#5f3787"
-    if val in {15}:
-        return "#b34db1"
+        for i in range(4): # Initial tile set up
+            for j in range(4):
+                self.tileList[i].append(self.Tile(ID = ((i * 4) + j + 1), row = i, col = j, window = self))
 
-def moveConverter(moveOrID):
-    moveToID = {
-        "up" : "w",
-        "down" : "s",
-        "left" : "a",
-        "right" : "d"
-    }
+                tileObj = self.tileList[i][j]
 
-    if moveOrID in moveToID:
-        return moveToID[moveOrID]
-    else:
-        for key, value in moveToID.items():
-            if value == moveOrID:
-                return key
+                tileObj.canvas_id = self.canvas.create_rectangle(
+                    0, 0, 0, 0,
+                    fill = "blue",
+                    outline = "black",
+                    width = 5,
+                )
 
-def keyChecker(event):
-    key = event.keysym
+                tileObj.text_id = self.canvas.create_text(
+                    0, 0,
+                    text = tileObj.getAttribute(),
+                    fill = "white",
+                    font = ("SF Pro", 50, "bold"),
+                )
 
-    if key == "l":
-        onListEnter()
+                self.canvas.tag_bind( # Bind mouse detection to each tile
+                    tileObj.canvas_id,
+                    "<Enter>",
+                    lambda e, o = tileObj: self.onMouseEnter(e, o)
+                )
 
-    if key == "space":
-        resetBoard()
+        self.root.bind("<KeyPress>", self.onKeyPress) # Track and react to key presses
 
-    movementKeys = [
-        "Up", "Down", "Left", "Right",
-        "w", "s", "a", "d"
-    ]
+        self.canvas.bind("<Configure>", self.onResize) # Track and react to resizing
 
-    if key in movementKeys:
-        onKeyPress(key)
+        self.periodic() # Initial periodic function
 
-def onResize(event):
-    for i in range(4):
-        for j in range(4):
-            tileObj = spaceList[i][j]
+        self.root.mainloop() # Start window
 
-            xPos = ((canvas.winfo_width() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.col) + boxSpacing)
-            yPos = ((canvas.winfo_height() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.row) + boxSpacing)
+    class Tile:
+        def __init__(self, ID, value = "0", tileColor = "gray", textColor = "white", row = 0, col = 0, window = None):
+            self.parent = window # Mainly for accessing constants
 
-            canvas.coords(tileObj.canvas_id, xPos, yPos, xPos + boxWidth, yPos + boxWidth)
-            canvas.coords(tileObj.text_id, xPos + boxWidth / 2, yPos + boxWidth / 2)
+            self.tileColor = tileColor
+            self.textColor = textColor
 
-def onAdvancedToggle():
-    global advanced
+            self.ID = ID # Unchanging integer ID
+            self.value = value # String value in hexidecimal
+            self.display = int(self.value, 16) # Int value integer based on self.value
 
-    if advanced:
-        advanced = False
-    else:
-        advanced = True
+            self.row = row
+            self.col = col
 
-    print(f"Toggled Advanced Move {advanced}")
+            self.canvas_id = None
+            self.text_id = None
 
-def getAdvanced():
-    global advanced
+            self.x = 0
+            self.y = 0
 
-    return advanced
+        def getAttribute(self, attribute = "value"): # Returns self.value by default
+            if not attribute:
+                return self.value
+            elif attribute == "row":
+                return self.row
+            elif attribute == "col":
+                return self.col
 
-root = tk.Tk()
-canvas = tk.Canvas(root, width = 800, height = 400, bg = "black", highlightthickness = 0)
-canvas.grid(row = 1, column = 0, sticky = "nsew")
-canvas.bind("<Configure>", onResize)
+        def updateDisplayValue(self):
+            self.display = int(self.value, 16)
 
-root.bind("<KeyPress>", keyChecker)
+        def updateColor(self):
+            constantsReference = self.parent.constants
 
-root.grid_columnconfigure(0, weight = 1)
-root.grid_rowconfigure(1, weight = 1)
+            advanced = constantsReference.getConstant("tiles.advanced")
 
-# root.grid_rowconfigure(1, weight = 1)
-# root.grid_columnconfigure(1, weight = 1)
+            self.textColor = constantsReference.getConstant("colors.white")
 
-canvas.focus_set()
+            if self.display in {0}:
+                self.tileColor = constantsReference.getConstant("colors.black")
+                self.textColor = constantsReference.getConstant("colors.black")
+                return
 
-movePerSecondLabel = tk.Label(root, text = "")
-movePerSecondLabel.grid(row = 0, column = 0, sticky = "ne")
+            if not advanced:
+                if self.display == self.ID:
+                    self.tileColor = constantsReference.getConstant("colors.orange")
+                else:
+                    self.tileColor = constantsReference.getConstant("colors.blue")
+            else:
+                if self.display in {1, 2, 3, 4}:
+                    self.tileColor = constantsReference.getConstant("colors.red")
+                elif self.display in {5, 9, 13}:
+                    self.tileColor = constantsReference.getConstant("colors.yellow")
+                elif self.display in {6, 7, 8}:
+                    self.tileColor = constantsReference.getConstant("colors.green")
+                elif self.display in {10, 14}:
+                    self.tileColor = constantsReference.getConstant("colors.blue")
+                elif self.display in {11, 12}:
+                    self.tileColor = constantsReference.getConstant("colors.purple")
+                elif self.display in {15}:
+                    self.tileColor = constantsReference.getConstant("colors.pink")
 
-moveTotalLabel = tk.Label(root, text = "")
-moveTotalLabel.grid(row = 0, column = 0, sticky = "nw")
-
-timeTakenLabel = tk.Label(root, text = "")
-timeTakenLabel.grid(row = 0, column = 0, sticky = "n")
-
-# advanced = tk.BooleanVar() # Advanced boolean
-advanced = False
-advancedToggle = tk.Checkbutton(root, text = "Advanced Mode?", command = onAdvancedToggle)
-advancedToggle.grid(row = 2, column = 0, sticky = "se")
-
-solved = False # Check if puzzle is solved
-startSolving = False # Check if puzzle has been started
-
-stats = moveTimer.Stats()
-
-def onListEnter():
-    moveList = puzzle.checkListValidity()
-    print("The move list contains:", moveList)
-    for move in list(moveList):
-        puzzle.moveTile(moveConverter(move), getAdvanced())
-        stats.addMove(move)
-    # updateBoard()
-
-def onKeyPress(key):
-    global solved
-
-    if not solved:
-        if key == "Up" or key == "w":
-            stats.addMove(puzzle.moveTile("up", getAdvanced()))
-
-        if key == "Down" or key == "s":
-            stats.addMove(puzzle.moveTile("down", getAdvanced()))
-
-        if key == "Left" or key == "a":
-            stats.addMove(puzzle.moveTile("left", getAdvanced()))
-
-        if key == "Right" or key == "d":
-            stats.addMove(puzzle.moveTile("right", getAdvanced()))
-
-    # updateBoard()
-
-def onMouseEnter(event, object): # TODO: Advanced mousemovement (doesnt need to be adjacent to zero)
-    global solved
-
-    if not solved:
-        currentMove = moveConverter(puzzle.getMove(object.getVal(), getAdvanced()))
-
-        if currentMove != None:
-            stats.addMove(currentMove)
-
-        puzzle.moveTile(puzzle.getMove(object.getVal(), getAdvanced()), getAdvanced(), object.getVal("col"), object.getVal("row"))
-
-    # updateBoard()
-
-def resetBoard():
-        stats.resetAll()
-        puzzle.scramblePuzzle()
-        puzzle.displayPuzzle()
-        updateBoard(reset = True)
-
-boxWidth = 100
-boxSpacing = 1
-puzzleWidth = boxWidth * 4
-
-def updateBoard(advanced = False, reset = False):
-    global solved
-
-    if not solved or reset:
-        solved = True
-
+    def onResize(self, event = None):
         for i in range(4):
             for j in range(4):
-                tileObj = spaceList[i][j]
-                tileObj.value = puzzle.getVal(i, j)
+                tileObj = self.tileList[i][j]
 
-                displayValue = int(tileObj.value, 16)
+                tileWidth = self.constants.getConstant("tiles.tileWidth")
+                tileSpacing = self.constants.getConstant("tiles.tileSpacing")
+                puzzleWidth = (4 * tileWidth)
 
-                if not advanced:
-                    if tileObj.value == "0":
-                        canvas.itemconfigure(tileObj.canvas_id, fill = "black", outline = "black")
-                        canvas.itemconfigure(tileObj.text_id, text = "")
-                    else:
-                        if tileObj.ID == displayValue:
-                            canvas.itemconfigure(tileObj.canvas_id, fill = "orange", outline = "black")
-                        else:
-                            solved = False
-                            canvas.itemconfigure(tileObj.canvas_id, fill = "blue", outline = "black")
+                xPos = ((self.root.winfo_width() - (puzzleWidth + (3 * tileSpacing))) / 2) + (tileWidth * (tileObj.col) + tileSpacing)
+                yPos = ((self.root.winfo_height() - (puzzleWidth + (3 * tileSpacing))) / 2) + (tileWidth * (tileObj.row) + tileSpacing)
 
-                        canvas.itemconfigure(tileObj.text_id, text = displayValue, fill = "white")
-                        # canvas.itemconfigure(tileObj.text_id, text = tileObj.ID) # Show something instead of Value
-                else:
-                    if tileObj.value == "0":
-                        canvas.itemconfigure(tileObj.canvas_id, fill = "black", outline = "")
-                        canvas.itemconfigure(tileObj.text_id, text = "")
-                    else:
-                        if tileObj.ID != displayValue:
-                            solved = False
-                        canvas.itemconfigure(tileObj.canvas_id, fill = getColor(displayValue), outline = "")
-                        canvas.itemconfigure(tileObj.text_id, text = displayValue, fill = "black")
-        if solved:
-            stats.setSolving(False)
-            allMoves = [move.direction for move in stats.getMovesHistory()]
-            print(f"It took you {stats.getNumMoves()} to solve this puzzle in {stats.getTime()} seconds. The sequence you took is:")
-            print(*allMoves, sep = "")
+                self.canvas.coords(tileObj.canvas_id, xPos, yPos, xPos + tileWidth, yPos + tileWidth)
+                self.canvas.coords(tileObj.text_id, xPos + (tileWidth / 2), yPos + (tileWidth / 2))
 
-spaceList = [
-    [],
-    [],
-    [],
-    []
-]
+    def onKeyPress(self, event):
+        key = event.keysym # Grab key from event
 
-for i in range(4): # TODO: change to be flexible between puzzle sizes
-    for j in range(4):
-        spaceList[i].append(Tile((i * 4) + j + 1, row = i, col = j))
+        settingKeys = [
+            "space"
+        ]
 
-        tileObj = spaceList[i][j]
+        movementKeys = [
+            "Up", "w", "Right", "d",
+            "Down", "s", "Left", "a"
+        ]
 
-        tileObj.x = j * (boxSpacing + boxWidth)
-        tileObj.y = i * (boxSpacing + boxWidth)
+        if key in movementKeys:
+            allegedKey = movementKeys[(int((movementKeys.index(key) + 0.5) / 2)) * 2].lower()
+            self.puzzle.moveTarget(allegedKey)
 
-        xPos = ((root.winfo_width() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.col) + boxSpacing)
-        yPos = ((root.winfo_height() - (puzzleWidth + (3 * boxSpacing))) / 2) + (boxWidth * (tileObj.row) + boxSpacing)
+        elif key in settingKeys:
+            if key == "space":
+                self.puzzle.scramblePuzzle()
 
-        tileObj.canvas_id = canvas.create_rectangle(
-            xPos, tileObj.y,
-            xPos + boxWidth, tileObj.y + boxWidth,
-            fill = "blue",
-            outline = "black",
-            width = 5
-        )
 
-        tileObj.text_id = canvas.create_text(
-            xPos + boxWidth / 2,
-            tileObj.y + boxWidth / 2,
-            text = tileObj.getVal(),
-            fill = "white",
-            font = ("SF Pro", 50, "bold")
-        )
+    def onMouseEnter(self, event, tileObj):
+        # allegedMove = self.puzzle.getMove(self.puzzle.findTarget(tileObj.value))
+        targetPos = self.puzzle.findTarget(tileObj.value)
+        allegedMove = self.puzzle.getMove(targetPos[0], targetPos[1])
 
-        canvas.tag_bind(tileObj.canvas_id, "<Enter>", lambda e, o = tileObj: onMouseEnter(e, o))
+        if allegedMove != "invald":
+            self.puzzle.moveTarget(allegedMove, targetPos[0], targetPos[1])
 
-def updateInfo():
-    movesPerSecond = stats.getMPS()
-    movesTotal = stats.getNumMoves()
-    timeTaken = stats.getTime()
+    def updateTiles(self):
+        for i in range(4):
+            for j in range(4):
+                tileObj = self.tileList[i][j]
 
-    movePerSecondLabel.config(text = f"MPS: {movesPerSecond}")
-    moveTotalLabel.config(text = f"Moves: {movesTotal}")
-    timeTakenLabel.config(text = f"Time: {timeTaken}")
+                tileObj.value = self.puzzle.getPosVal(i, j) # Get values from puzzle reference
+                tileObj.updateDisplayValue()
+                tileObj.updateColor()
 
-    updateBoard(advanced = getAdvanced())
+                self.canvas.itemconfigure(tileObj.canvas_id, fill = tileObj.tileColor)
+                self.canvas.itemconfigure(tileObj.text_id, text = tileObj.display, fill = tileObj.textColor)
 
-    root.after(20, updateInfo)  # Call as often as possible (every ~1ms)
+    def periodic(self):
+        self.updateTiles()
 
-# Initial setup
-resetBoard()
-updateBoard()
-updateInfo()
+        self.root.after(20, self.periodic) # Recursively call every 20ms
 
-root.mainloop()
+
+
+window = Window(puzzleClass.Puzzle())

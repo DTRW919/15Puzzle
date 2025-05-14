@@ -1,0 +1,22 @@
+{
+  "constants": {
+    "colors": {
+      "red": "#f5462f",
+      "orange": "#e37734",
+      "yellow": "#ffc917",
+      "green": "#1eb34b",
+      "blue": "#3081bf",
+      "purple": "#5f3787",
+      "pink": "#b34db1",
+
+      "white": "#ffffff",
+      "black": "#000000"
+    },
+    "tiles": {
+      "tileWidth": 100,
+      "tileSpacing": 0,
+      "advanced": true,
+      "tileBorderWidth": 2
+    }
+  }
+}

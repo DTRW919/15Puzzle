@@ -1,186 +1,159 @@
 import random
+import constants
 
-puzzle = [
-    ["1", "2", "3", "4"],
-    ["5", "6", "7", "8"],
-    ["9", "A", "B", "C"],
-    ["D", "E", "F", "0"]
-]
-# 0 is the empty tile
 
-def checkListValidity(prompt = ""):
-    userInput = " "
-    userList = list(userInput)
+class Puzzle:
+    def __init__(self):
+        self.puzzle = [
+            ["1", "2", "3", "4"],
+            ["5", "6", "7", "8"],
+            ["9", "A", "B", "C"],
+            ["D", "E", "F", "0"]
+        ]  # Strings
 
-    validMoves = ["w", "s", "a", "d"]
+        self.solved = True
+        self.startedSolve = False
 
-    flag = False
+        self.constants = constants.Constants()
 
-    while not flag:
-        flag = True
-        for char in userList:
-            if char not in validMoves:
-                flag = False
+        self.scramblePuzzle()
 
-        if not flag:
+    def inputValidity(self, options = [], prompt = ""):
+        userInput = None
+
+        while userInput not in options:
             userInput = input(prompt + ": ")
-            userList = list(userInput)
-            print(userList)
 
-    return userInput
+        return userInput
 
-def checkValidity(validOptions = [], prompt = ""):
-    userInput = None
+    def logPuzzle(self):
+        for row in range(len(self.puzzle)):
+            for col in self.puzzle[row]:
+                print(col, end=" ")
+            print()
 
-    while userInput not in validOptions:
-        userInput = input(prompt + ": ")
+    def findTarget(self, target = "0"): # Defaults to empty tile
+        for row, col in enumerate(self.puzzle):
+            if target in col:
+                return row, col.index(target)
 
-    return userInput
+        print("Error: target not found")
+        return -1, -1
 
-def displayPuzzle(): # TODO: Maybe remove all unecessary 'puzzle' parameters?
-    for row in range(len(puzzle)):
-        for val in puzzle[row]:
-            print(val, end = " ")
-        print()
+    def getPosVal(self, y, x):
+        value = self.puzzle[y][x]
 
-def getVal(y, x):
-    value = puzzle[y][x]
+        return value
 
-    return value
+    def getMove(self, targetY, targetX):
+        advanced = self.constants.getConstant("tiles.advanced")
 
-def getMove(target, advanced = False): # Checks if adjacent to empty tile
-    zeroY, zeroX = findTile("0")
-    targetY, targetX = findTile(target)
+        zeroY, zeroX = self.findTarget("0")
 
-    if not advanced:
-        if zeroX == targetX:
-            if zeroY - targetY == 1:
-                return "down"
-            if zeroY - targetY == -1:
-                return "up"
-        if zeroY == targetY:
-            if zeroX - targetX == 1:
-                return "right"
-            if zeroX - targetX == -1:
-                return "left"
-    else:
-        if zeroX == targetX:
-            if zeroY > targetY:
-                return "down"
-            if zeroY < targetY:
-                return "up"
-        if zeroY == targetY:
-            if zeroX > targetX:
-                return "right"
-            if zeroX < targetX:
-                return "left"
+        if not advanced:
+            if zeroX == targetX:
+                if zeroY - targetY == 1:
+                    return "down"
+                if zeroY - targetY == -1:
+                    return "up"
+            if zeroY == targetY:
+                if zeroX - targetX == 1:
+                    return "right"
+                if zeroX - targetX == -1:
+                    return "left"
+        else:
+            if zeroX == targetX:
+                if zeroY > targetY:
+                    return "down"
+                if zeroY < targetY:
+                    return "up"
+            if zeroY == targetY:
+                if zeroX > targetX:
+                    return "right"
+                if zeroX < targetX:
+                    return "left"
 
-    return "invalid"
+        return "invalid"
 
-def setTile(y, x, val = "0"): # Defaults to 0
-    puzzle[y][x] = val
+    def setTarget(self, targetY, targetX, val = "0"):
+        self.puzzle[targetY][targetX] = val
 
-def findTile(target, puzzle = puzzle):
-    for row, col in enumerate(puzzle):
-        if target in col:
-            return row, col.index(target)
+    def moveTarget(self, move, targetY = -1, targetX = -1):
+        advanced = self.constants.getConstant("tiles.advanced")
 
-    print("Error: target not found")
-    return -1, -1
+        zeroY, zeroX = self.findTarget()
 
-def moveTile(move, advanced = False, tileLocX = 0, tileLocY = 0): # tileLoc is the location of the target tile
-    locY, locX = findTile("0") # Location of empty tile
+        if not advanced or (targetY == -1 and targetX == -1):
+            if move == "up" and zeroY != len(self.puzzle) - 1:
+                self.setTarget(zeroY, zeroX, self.getPosVal(zeroY + 1, zeroX))
+                self.setTarget(zeroY + 1, zeroX)
 
-    if not advanced:
-        if move == "up" and locY != len(puzzle) - 1:
-            setTile(locY, locX, getVal(locY + 1, locX))
-            setTile(locY + 1, locX)
-            return "w"
+            if move == "down" and zeroY != 0:
+                self.setTarget(zeroY, zeroX, self.getPosVal(zeroY - 1, zeroX))
+                self.setTarget(zeroY - 1, zeroX)
 
-        if move == "down" and locY != 0:
-            setTile(locY, locX, getVal(locY - 1, locX))
-            setTile(locY - 1, locX)
-            return "s"
+            if move == "left" and zeroX != len(self.puzzle[0]) - 1:
+                self.setTarget(zeroY, zeroX, self.getPosVal(zeroY, zeroX + 1))
+                self.setTarget(zeroY, zeroX + 1)
 
-        if move == "left" and locX != len(puzzle[0]) - 1:
-            setTile(locY, locX, getVal(locY, locX + 1))
-            setTile(locY, locX + 1)
-            return "a"
+            if move == "right" and zeroX != 0:
+                self.setTarget(zeroY, zeroX, self.getPosVal(zeroY, zeroX - 1))
+                self.setTarget(zeroY, zeroX - 1)
+        else:
+            if move == "up":
+                for i in range(targetY - zeroY):
+                    self.setTarget(zeroY + i, zeroX, self.getPosVal(zeroY + i + 1, zeroX))
+                self.setTarget(targetY, targetX)
 
-        if move == "right" and locX != 0:
-            setTile(locY, locX, getVal(locY, locX - 1))
-            setTile(locY, locX - 1)
-            return "d"
-    else:
-        if move == "up":
-            for i in range(tileLocY - locY):
-                setTile(locY + i, locX, getVal(locY + i + 1, locX))
-            setTile(tileLocY, tileLocX)
+            if move == "down":
+                for i in range(zeroY - targetY):
+                    self.setTarget(zeroY - i, zeroX, self.getPosVal(zeroY - i - 1, zeroX))
+                self.setTarget(targetY, targetX)
 
-        if move == "down":
-            for i in range(locY - tileLocY):
-                setTile(locY - i, locX, getVal(locY - i - 1, locX))
-            setTile(tileLocY, tileLocX)
+            if move == "left":
+                for i in range(targetX - zeroX):
+                    self.setTarget(zeroY, zeroX + i, self.getPosVal(zeroY, zeroX + i + 1))
+                self.setTarget(targetY, targetX)
 
-        if move == "left":
-            for i in range(tileLocX - locX):
-                setTile(locY, locX + i, getVal(locY, locX + i + 1))
-            setTile(tileLocY, tileLocX)
+            if move == "right":
+                for i in range(zeroX - targetX):
+                    self.setTarget(zeroY, zeroX - i, self.getPosVal(zeroY, zeroX - i - 1))
+                self.setTarget(targetY, targetX)
 
-        if move == "right":
-            for i in range(locX - tileLocX):
-                setTile(locY, locX - i, getVal(locY, locX - i - 1))
-            setTile(tileLocY, tileLocX)
+    def scramblePuzzle(self):
+        print("Resetting puzzle...")
 
-    return ""
+        def getInversions(flatPuzzle):
+            inversions = 0
 
-def scramblePuzzle():
-    print("Resetting puzzle...")
+            zeroPos = flatPuzzle.index(0)
+            flatPuzzle.remove(0)
 
-    def getInversions(flatPuzzle):
-        inversions = 0
+            for i in range(len(flatPuzzle)):
+                for j in range(i + 1, len(flatPuzzle)):
+                    if flatPuzzle[i] > flatPuzzle[j]:
+                        inversions += 1
 
-        zeroPos = flatPuzzle.index(0)
-        flatPuzzle.remove(0)
+            flatPuzzle.insert(zeroPos, 0)
 
-        for i in range(len(flatPuzzle)):
-            for j in range(i + 1, len(flatPuzzle)):
-                if flatPuzzle[i] > flatPuzzle[j]:
-                    inversions += 1
+            print(f"there are {inversions} inversions")
+            print(*flatPuzzle)
+            return inversions
 
-        flatPuzzle.insert(zeroPos, 0)
+        def shuffleFlatPuzzle(flatPuzzle):
+            return random.shuffle(flatPuzzle)
 
-        print(f"there are {inversions} inversions")
-        print(*flatPuzzle)
-        return inversions
+        flatPuzzle = [int(item, 16) for sublist in self.puzzle for item in sublist]
 
-    def shuffleFlatPuzzle(flatPuzzle):
-        return random.shuffle(flatPuzzle)
+        shuffleFlatPuzzle(flatPuzzle)
 
-    flatPuzzle = [int(item, 16) for sublist in puzzle for item in sublist]
+        inversions = getInversions(flatPuzzle)
+        zeroRow = 4 - (flatPuzzle.index(0) // 4) # row number from bottom because proofs idk
 
-    shuffleFlatPuzzle(flatPuzzle)
-
-    inversions = getInversions(flatPuzzle)
-    zeroRow = 4 - (flatPuzzle.index(0) // 4) # row number from bottom because proofs idk
-
-    if (inversions % 2) ^ (zeroRow % 2) != 1: # TODO: Make sure this works
-        print("Unsolvable. Trying again.") # TODO: Redo shuffling algorithm to manually shuffle from sovled state to guarantee
-        scramblePuzzle()
-    else:
-        for row in range(4):
-            for col in range(4):
-                puzzle[row][col] = hex(flatPuzzle[(row * 4) + col]).upper()[2 :]
-
-### Test ###
-# checkValidity(listCheck = True)
-
-# validMoves = ["left", "right", "up", "down", "exit"]
-# userInput = ""
-# while True:
-#     userInput = checkValidity(validMoves, "Enter a valid move")
-#     if userInput == "exit":
-#         break
-#     moveTile(userInput)
-#     print()
-#     displayPuzzle(puzzle)
+        if (inversions % 2) ^ (zeroRow % 2) != 1: # TODO: Make sure this works
+            print("Unsolvable. Trying again.") # TODO: Redo shuffling algorithm to manually shuffle from sovled state to guarantee
+            self.scramblePuzzle()
+        else:
+            for row in range(4):
+                for col in range(4):
+                    self.puzzle[row][col] = hex(flatPuzzle[(row * 4) + col]).upper()[2 :]
