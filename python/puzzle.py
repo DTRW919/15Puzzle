@@ -4,10 +4,10 @@ import constants
 class Puzzle:
     def __init__(self):
         self.puzzle = [
-            ["1", "2", "3", "4"],
-            ["5", "6", "7", "8"],
-            ["9", "A", "B", "C"],
-            ["D", "E", "F", "0"]
+            ["0", "1", "2", "3"],
+            ["4", "5", "6", "7"],
+            ["8", "9", "A", "B"],
+            ["C", "D", "E", "F"]
         ]  # Strings
 
         self.solved = True
@@ -25,6 +25,10 @@ class Puzzle:
 
     def setStarted(self, state):
         self.startedSolve = state
+
+    def getSolved(self):
+        self.checkFinished()
+        return self.solved
 
     def inputValidity(self, options = [], prompt = ""):
         userInput = None
@@ -155,9 +159,23 @@ class Puzzle:
                 returnString += self.moveRight(i, advanced)
             self.setTarget(targetY, targetX)
 
-        if returnString != "" and not self.getStarted():
-            self.setStarted(True)
+
+        if returnString != "" and not self.startedSolve:
+            self.startedSolve = True
+            self.getStarted()
+
+        self.checkFinished()
+
         return returnString
+
+    def checkFinished(self):
+        for i in range(4):
+            for j in range(4):
+                if int(self.puzzle[i][j], 16) != (4 * i) + j:
+                    self.solved = False
+                    return
+        self.solved = True
+        self.startedSolve = False
 
     def scramblePuzzle(self):
         print("Resetting puzzle...")
@@ -197,4 +215,5 @@ class Puzzle:
                 for col in range(4):
                     self.puzzle[row][col] = hex(flatPuzzle[(row * 4) + col]).upper()[2 :]
 
+        self.solved = False
         self.setStarted(False)

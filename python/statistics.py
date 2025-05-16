@@ -39,6 +39,9 @@ class Statistics:
             self.movesHistory.append(self.Move(char))
 
     def printMoves(self):
+        print(*[entry.direction for entry in self.movesHistory], sep = "")
+
+    def printFinished(self):
         print(f"You completed this 15 Puzzle in {self.getTime()} seconds ", end = "")
         print(f"with a MPS of {self.getMPS()} ", end = "")
         print("following the directions: ")

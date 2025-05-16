@@ -55,7 +55,7 @@ class Window:
         self.timeTakenLabel = tkinter.Label(self.root, text = "3")
         self.timeTakenLabel.grid(row = 0, sticky = "n")
 
-        self.solving = False
+        self.solving = False # Initially not solving
 
         self.periodic() # Initial periodic function
 
@@ -203,13 +203,14 @@ class Window:
         self.updateInfo()
 
         if self.puzzle.getStarted() and not self.solving: # Started solving...
-            self.stats.startTracking()
-            self.solving = True
+            self.solving = True # Change state so this only runs once
 
-        if self.solving and self.isSolved(): # It's solved!
+            self.stats.startTracking()
+
+        if self.puzzle.getSolved() and self.solving: # It's solved!
+            self.solving = False # Change state so this only runs once
+
             self.stats.stopTracking()
-            self.puzzle.setStarted(False) # TODO: Do this in puzzle.py not here
-            self.solving = False
-            self.stats.printMoves()
+            self.stats.printFinished()
 
         self.root.after(20, self.periodic) # Recursively call every 20ms
