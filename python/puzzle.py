@@ -96,46 +96,63 @@ class Puzzle:
 
         self.puzzle[targetY][targetX] = val
 
-    def moveUp(self, target):
+    def moveUp(self, target = 0):
         self.setTarget(self.zeroY + target, self.zeroX, self.getPosVal(self.zeroY + target + 1, self.zeroX))
         return "w"
 
-    def moveDown(self, target):
+    def moveDown(self, target = 0):
         self.setTarget(self.zeroY - target, self.zeroX, self.getPosVal(self.zeroY - target - 1, self.zeroX))
         return "s"
 
-    def moveLeft(self, target):
+    def moveLeft(self, target = 0):
         self.setTarget(self.zeroY, self.zeroX + target, self.getPosVal(self.zeroY, self.zeroX + target + 1))
         return "a"
 
-    def moveRight(self, target):
+    def moveRight(self, target = 0):
         self.setTarget(self.zeroY, self.zeroX - target, self.getPosVal(self.zeroY, self.zeroX - target - 1))
         return "d"
 
-    def moveTarget(self, move, targetY = -1, targetX = -1):
+    def moveTarget(self, move, targetY = -1, targetX = -1, limited = False):
         self.zeroY, self.zeroX = self.findTarget() # Find location of empty tile
 
         returnString = ""
 
-        if move == "up":
-            for i in range(targetY - self.zeroY):
-                returnString += self.moveUp(i)
-            self.setTarget(targetY, targetX) # Set empty tile
+        if not limited:
+            if move == "up":
+                for i in range(targetY - self.zeroY):
+                    returnString += self.moveUp(i)
+                self.setTarget(targetY, targetX) # Set empty tile
 
-        if move == "down":
-            for i in range(self.zeroY - targetY):
-                returnString += self.moveDown(i)
-            self.setTarget(targetY, targetX) # Set empty tile
+            if move == "down":
+                for i in range(self.zeroY - targetY):
+                    returnString += self.moveDown(i)
+                self.setTarget(targetY, targetX) # Set empty tile
 
-        if move == "left":
-            for i in range(targetX - self.zeroX):
-                returnString += self.moveLeft(i)
-            self.setTarget(targetY, targetX) # Set empty tile
+            if move == "left":
+                for i in range(targetX - self.zeroX):
+                    returnString += self.moveLeft(i)
+                self.setTarget(targetY, targetX) # Set empty tile
 
-        if move == "right":
-            for i in range(self.zeroX - targetX):
-                returnString += self.moveRight(i)
-            self.setTarget(targetY, targetX)
+            if move == "right":
+                for i in range(self.zeroX - targetX):
+                    returnString += self.moveRight(i)
+                self.setTarget(targetY, targetX) # Set empty tile
+        else:
+            if move == "up" and self.zeroY != len(self.puzzle) - 1: # Check if target is at edge
+                returnString += self.moveUp()
+                self.setTarget(self.zeroY + 1, self.zeroX)
+
+            if move == "down" and self.zeroY != 0: # Check if target is at edge
+                returnString += self.moveDown()
+                self.setTarget(self.zeroY - 1, self.zeroX)
+
+            if move == "left" and self.zeroX != len(self.puzzle[0]) - 1: # Check if target is at edge
+                returnString += self.moveLeft()
+                self.setTarget(self.zeroY, self.zeroX + 1)
+
+            if move == "right" and self.zeroX != 0: # Check if target is at edge
+                returnString += self.moveRight()
+                self.setTarget(self.zeroY, self.zeroX - 1)
 
         if returnString != "" and not self.startedSolve:
             self.startedSolve = True

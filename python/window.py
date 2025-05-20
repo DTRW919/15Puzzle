@@ -164,7 +164,7 @@ class Window:
 
         if key in movementKeys:
             allegedKey = movementKeys[(int((movementKeys.index(key)) / 2)) * 2].lower()
-            self.stats.addMove(self.puzzle.moveTarget(allegedKey))
+            self.stats.addMove(self.puzzle.moveTarget(allegedKey, limited = True))
 
         elif key in settingKeys:
             if key == "space":
