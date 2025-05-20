@@ -17,8 +17,12 @@ class Puzzle:
         self.zeroX = -1
 
         self.constants = constants.Constants()
+        self.advanced = self.constants.getConstant("tiles.advanced")
 
         self.scramblePuzzle()
+
+    def updateAdvanced(self):
+        self.advanced = self.constants.getConstant("tiles.advanced")
 
     def getStarted(self):
         return self.startedSolve
@@ -58,11 +62,11 @@ class Puzzle:
         return value
 
     def getMove(self, targetY, targetX):
-        advanced = self.constants.getConstant("tiles.advanced")
+        self.updateAdvanced()
 
         self.zeroY, self.zeroX = self.findTarget("0")
 
-        if not advanced:
+        if not self.advanced:
             if self.zeroX == targetX:
                 if self.zeroY - targetY == 1:
                     return "down"
@@ -94,8 +98,8 @@ class Puzzle:
 
         self.puzzle[targetY][targetX] = val
 
-    def moveUp(self, target, advanced = False):
-        if not advanced:
+    def moveUp(self, target):
+        if not self.advanced:
             if self.zeroY != len(self.puzzle) - 1:
                 self.setTarget(self.zeroY, self.zeroX, self.getPosVal(self.zeroY + 1, self.zeroX))
                 self.setTarget(self.zeroY + 1, self.zeroX)
@@ -104,8 +108,8 @@ class Puzzle:
             self.setTarget(self.zeroY + target, self.zeroX, self.getPosVal(self.zeroY + target + 1, self.zeroX))
             return "w"
 
-    def moveDown(self, target, advanced = False):
-        if not advanced:
+    def moveDown(self, target):
+        if not self.advanced:
             if self.zeroY != 0:
                 self.setTarget(self.zeroY, self.zeroX, self.getPosVal(self.zeroY - 1, self.zeroX))
                 self.setTarget(self.zeroY - 1, self.zeroX)
@@ -114,8 +118,8 @@ class Puzzle:
             self.setTarget(self.zeroY - target, self.zeroX, self.getPosVal(self.zeroY - target - 1, self.zeroX))
             return "s"
 
-    def moveLeft(self, target, advanced = False):
-        if not advanced:
+    def moveLeft(self, target):
+        if not self.advanced:
             if self.zeroX != len(self.puzzle[0]) - 1:
                 self.setTarget(self.zeroY, self.zeroX, self.getPosVal(self.zeroY, self.zeroX + 1))
                 self.setTarget(self.zeroY, self.zeroX + 1)
@@ -124,8 +128,8 @@ class Puzzle:
             self.setTarget(self.zeroY, self.zeroX + target, self.getPosVal(self.zeroY, self.zeroX + target + 1))
             return "a"
 
-    def moveRight(self, target, advanced = False):
-        if not advanced:
+    def moveRight(self, target):
+        if not self.advanced:
             if self.zeroX != 0:
                 self.setTarget(self.zeroY, self.zeroX, self.getPosVal(self.zeroY, self.zeroX - 1))
                 self.setTarget(self.zeroY, self.zeroX - 1)
@@ -135,30 +139,30 @@ class Puzzle:
             return "d"
 
     def moveTarget(self, move, targetY = -1, targetX = -1):
-        self.zeroY, self.zeroX = self.findTarget() # Find location of empty tile
+        self.updateAdvanced()
 
-        advanced = self.constants.getConstant("tiles.advanced")
+        self.zeroY, self.zeroX = self.findTarget() # Find location of empty tile
 
         returnString = ""
 
         if move == "up":
             for i in range(targetY - self.zeroY):
-                returnString += self.moveUp(i, advanced)
+                returnString += self.moveUp(i)
             self.setTarget(targetY, targetX) # Set empty tile
 
         if move == "down":
             for i in range(self.zeroY - targetY):
-                returnString += self.moveDown(i, advanced)
+                returnString += self.moveDown(i)
             self.setTarget(targetY, targetX) # Set empty tile
 
         if move == "left":
             for i in range(targetX - self.zeroX):
-                returnString += self.moveLeft(i, advanced)
+                returnString += self.moveLeft(i)
             self.setTarget(targetY, targetX) # Set empty tile
 
         if move == "right":
             for i in range(self.zeroX - targetX):
-                returnString += self.moveRight(i, advanced)
+                returnString += self.moveRight(i)
             self.setTarget(targetY, targetX)
 
 
