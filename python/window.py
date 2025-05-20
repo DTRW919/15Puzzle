@@ -52,6 +52,12 @@ class Window:
                     lambda e, o = tileObj: self.onMouseEnter(e, o)
                 )
 
+                self.canvas.tag_bind(
+                    tileObj.tag,
+                    "<Button-1>",
+                    lambda e, o = tileObj: self.onMouseClick(e, o)
+                )
+
         self.movesPerSecondLabel = tkinter.Label(self.root, text = "1")
         self.movesPerSecondLabel.grid(row = 0, sticky = "ne")
         self.movesTotalLabel = tkinter.Label(self.root, text = "2")
@@ -165,6 +171,16 @@ class Window:
                 self.puzzle.scramblePuzzle()
                 self.solving = False
                 self.stats.resetAll()
+
+    def onMouseClick(self, event, tileObj):
+        self.updateAdvanced()
+
+        if not self.advanced:
+            targetPos = self.puzzle.findTarget(tileObj.value)
+            allegedMove = self.puzzle.getMove(targetPos[0], targetPos[1])
+
+            if allegedMove != "invald":
+                self.stats.addMove(self.puzzle.moveTarget(allegedMove, targetPos[0], targetPos[1]))
 
     def onMouseEnter(self, event, tileObj):
         self.updateAdvanced()

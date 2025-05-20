@@ -61,12 +61,10 @@ class Puzzle:
 
         return value
 
-    def getMove(self, targetY, targetX):
-        self.updateAdvanced()
-
+    def getMove(self, targetY, targetX, limited = False):
         self.zeroY, self.zeroX = self.findTarget("0")
 
-        if not self.advanced:
+        if limited:
             if self.zeroX == targetX:
                 if self.zeroY - targetY == 1:
                     return "down"
@@ -99,48 +97,22 @@ class Puzzle:
         self.puzzle[targetY][targetX] = val
 
     def moveUp(self, target):
-        if not self.advanced:
-            if self.zeroY != len(self.puzzle) - 1:
-                self.setTarget(self.zeroY, self.zeroX, self.getPosVal(self.zeroY + 1, self.zeroX))
-                self.setTarget(self.zeroY + 1, self.zeroX)
-                return "w"
-        else:
-            self.setTarget(self.zeroY + target, self.zeroX, self.getPosVal(self.zeroY + target + 1, self.zeroX))
-            return "w"
+        self.setTarget(self.zeroY + target, self.zeroX, self.getPosVal(self.zeroY + target + 1, self.zeroX))
+        return "w"
 
     def moveDown(self, target):
-        if not self.advanced:
-            if self.zeroY != 0:
-                self.setTarget(self.zeroY, self.zeroX, self.getPosVal(self.zeroY - 1, self.zeroX))
-                self.setTarget(self.zeroY - 1, self.zeroX)
-                return "s"
-        else:
-            self.setTarget(self.zeroY - target, self.zeroX, self.getPosVal(self.zeroY - target - 1, self.zeroX))
-            return "s"
+        self.setTarget(self.zeroY - target, self.zeroX, self.getPosVal(self.zeroY - target - 1, self.zeroX))
+        return "s"
 
     def moveLeft(self, target):
-        if not self.advanced:
-            if self.zeroX != len(self.puzzle[0]) - 1:
-                self.setTarget(self.zeroY, self.zeroX, self.getPosVal(self.zeroY, self.zeroX + 1))
-                self.setTarget(self.zeroY, self.zeroX + 1)
-                return "a"
-        else:
-            self.setTarget(self.zeroY, self.zeroX + target, self.getPosVal(self.zeroY, self.zeroX + target + 1))
-            return "a"
+        self.setTarget(self.zeroY, self.zeroX + target, self.getPosVal(self.zeroY, self.zeroX + target + 1))
+        return "a"
 
     def moveRight(self, target):
-        if not self.advanced:
-            if self.zeroX != 0:
-                self.setTarget(self.zeroY, self.zeroX, self.getPosVal(self.zeroY, self.zeroX - 1))
-                self.setTarget(self.zeroY, self.zeroX - 1)
-                return "d"
-        else:
-            self.setTarget(self.zeroY, self.zeroX - target, self.getPosVal(self.zeroY, self.zeroX - target - 1))
-            return "d"
+        self.setTarget(self.zeroY, self.zeroX - target, self.getPosVal(self.zeroY, self.zeroX - target - 1))
+        return "d"
 
     def moveTarget(self, move, targetY = -1, targetX = -1):
-        self.updateAdvanced()
-
         self.zeroY, self.zeroX = self.findTarget() # Find location of empty tile
 
         returnString = ""
@@ -164,7 +136,6 @@ class Puzzle:
             for i in range(self.zeroX - targetX):
                 returnString += self.moveRight(i)
             self.setTarget(targetY, targetX)
-
 
         if returnString != "" and not self.startedSolve:
             self.startedSolve = True
