@@ -35,6 +35,7 @@ class Window:
                     fill = "blue",
                     outline = "black",
                     width = 5,
+                    tags = tileObj.tag
                 )
 
                 tileObj.text_id = self.canvas.create_text(
@@ -42,6 +43,7 @@ class Window:
                     text = tileObj.getAttribute(),
                     fill = "white",
                     font = ("SF Pro", 50, "bold"),
+                    tags = tileObj.tag
                 )
 
                 self.canvas.tag_bind( # Bind mouse detection to each tile
@@ -79,6 +81,8 @@ class Window:
 
             self.canvas_id = None
             self.text_id = None
+
+            self.tag = ("tile" + str(self.ID))
 
             self.x = 0
             self.y = 0
@@ -166,7 +170,6 @@ class Window:
         self.updateAdvanced()
 
         if self.advanced:
-            print(tileObj.value)
             targetPos = self.puzzle.findTarget(tileObj.value)
             allegedMove = self.puzzle.getMove(targetPos[0], targetPos[1])
 
