@@ -136,7 +136,9 @@ class Puzzle:
 
     def moveTarget(self, move, targetY = -1, targetX = -1):
         self.zeroY, self.zeroX = self.findTarget() # Find location of empty tile
+
         advanced = self.constants.getConstant("tiles.advanced")
+
         returnString = ""
 
         if move == "up":

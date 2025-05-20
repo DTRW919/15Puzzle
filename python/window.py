@@ -17,6 +17,8 @@ class Window:
         self.stats = statistics.Statistics()
         self.constants = constants.Constants()
 
+        self.advanced = self.constants.getConstant("tiles.advanced")
+
         self.tileList = [[], [], [], []]
 
         for i in range(4): # Initial tile set up
@@ -95,7 +97,7 @@ class Window:
         def updateColor(self):
             constantsReference = self.parent.constants
 
-            advanced = constantsReference.getConstant("tiles.advanced")
+            self.parent.updateAdvanced()
 
             self.textColor = constantsReference.getConstant("colors.white")
 
@@ -104,7 +106,7 @@ class Window:
                 self.textColor = constantsReference.getConstant("colors.black")
                 return
 
-            if not advanced:
+            if not self.parent.advanced:
                 if self.display == self.ID:
                     self.tileColor = constantsReference.getConstant("colors.orange")
                 else:
@@ -161,11 +163,15 @@ class Window:
                 self.stats.resetAll()
 
     def onMouseEnter(self, event, tileObj):
-        targetPos = self.puzzle.findTarget(tileObj.value)
-        allegedMove = self.puzzle.getMove(targetPos[0], targetPos[1])
+        self.updateAdvanced()
 
-        if allegedMove != "invald":
-            self.stats.addMove(self.puzzle.moveTarget(allegedMove, targetPos[0], targetPos[1]))
+        if self.advanced:
+            print(tileObj.value)
+            targetPos = self.puzzle.findTarget(tileObj.value)
+            allegedMove = self.puzzle.getMove(targetPos[0], targetPos[1])
+
+            if allegedMove != "invald":
+                self.stats.addMove(self.puzzle.moveTarget(allegedMove, targetPos[0], targetPos[1]))
 
     def isSolved(self):
         for i in range(4):
@@ -197,6 +203,9 @@ class Window:
             self.movesPerSecondLabel.config(text = f"MPS: {movesPerSecond}")
             self.movesTotalLabel.config(text = f"Moves: {movesTotal}")
             self.timeTakenLabel.config(text = f"Time: {timeTaken}")
+
+    def updateAdvanced(self):
+        self.advanced = self.constants.getConstant("tiles.advanced")
 
     def periodic(self):
         self.updateTiles()
