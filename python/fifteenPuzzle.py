@@ -1,8 +1,4 @@
-import puzzle, window, statistics, constants
+import puzzle, window
 
-class FifteenPuzzle:
-    def __init__(self):
-        self.puzzle = puzzle.Puzzle()
-        self.window = window.Window(self.puzzle)
-
-fifteenPuzzle = FifteenPuzzle()
+puzzle = puzzle.Puzzle()
+window = window.Window(puzzle)
