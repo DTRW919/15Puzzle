@@ -138,21 +138,7 @@ class Puzzle:
                     returnString += self.moveRight(i)
                 self.setTarget(targetY, targetX) # Set empty tile
         else:
-            if move == "up" and self.zeroY != len(self.puzzle) - 1: # Check if target is at edge
-                returnString += self.moveUp()
-                self.setTarget(self.zeroY + 1, self.zeroX)
-
-            if move == "down" and self.zeroY != 0: # Check if target is at edge
-                returnString += self.moveDown()
-                self.setTarget(self.zeroY - 1, self.zeroX)
-
-            if move == "left" and self.zeroX != len(self.puzzle[0]) - 1: # Check if target is at edge
-                returnString += self.moveLeft()
-                self.setTarget(self.zeroY, self.zeroX + 1)
-
-            if move == "right" and self.zeroX != 0: # Check if target is at edge
-                returnString += self.moveRight()
-                self.setTarget(self.zeroY, self.zeroX - 1)
+            returnString += self.moveTargetLimited(move)
 
         if returnString != "" and not self.startedSolve:
             self.startedSolve = True
@@ -162,14 +148,43 @@ class Puzzle:
 
         return returnString
 
+    def moveTargetLimited(self, move):
+        self.zeroY, self.zeroX = self.findTarget() # Find location of empty tile
+
+        returnString = ""
+
+        if move == "up" and self.zeroY != len(self.puzzle) - 1: # Check if target is at edge
+            returnString += self.moveUp()
+            self.setTarget(self.zeroY + 1, self.zeroX)
+
+        if move == "down" and self.zeroY != 0: # Check if target is at edge
+            returnString += self.moveDown()
+            self.setTarget(self.zeroY - 1, self.zeroX)
+
+        if move == "left" and self.zeroX != len(self.puzzle[0]) - 1: # Check if target is at edge
+            returnString += self.moveLeft()
+            self.setTarget(self.zeroY, self.zeroX + 1)
+
+        if move == "right" and self.zeroX != 0: # Check if target is at edge
+            returnString += self.moveRight()
+            self.setTarget(self.zeroY, self.zeroX - 1)
+
+        return returnString
+
     def checkFinished(self):
+        self.solved = True
+
         for i in range(4):
             for j in range(4):
-                if int(self.puzzle[i][j], 16) != (4 * i) + j:
+                if i == 3 and j == 3:
+                    if self.puzzle[3][3] == "0": # Solved
+                        self.startedSolve = False
+                        break
+                if int(self.puzzle[i][j], 16) != (4 * i) + j + 1: # Not solved
                     self.solved = False
-                    return
-        self.solved = True
-        self.startedSolve = False
+                    break
+
+
 
     def scramblePuzzle(self):
         print("Resetting puzzle...")
