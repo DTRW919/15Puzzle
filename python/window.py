@@ -163,8 +163,9 @@ class Window:
         ]
 
         if key in movementKeys:
-            allegedKey = movementKeys[(int((movementKeys.index(key)) / 2)) * 2].lower()
-            self.stats.addMove(self.puzzle.moveTarget(allegedKey, limited = True))
+            allegedKey = movementKeys[(int((movementKeys.index(key)) / 2)) * 2].lower() # Goofy logic to determine key pressed
+            if not self.puzzle.getSolved():
+                self.stats.addMove(self.puzzle.moveTarget(allegedKey, limited = True))
 
         elif key in settingKeys:
             if key == "space":
@@ -175,7 +176,7 @@ class Window:
     def onMouseClick(self, event, tileObj):
         self.updateAdvanced()
 
-        if not self.advanced:
+        if not self.advanced and not self.puzzle.getSolved():
             targetPos = self.puzzle.findTarget(tileObj.value)
             allegedMove = self.puzzle.getMove(targetPos[0], targetPos[1])
 
@@ -185,7 +186,7 @@ class Window:
     def onMouseEnter(self, event, tileObj):
         self.updateAdvanced()
 
-        if self.advanced:
+        if self.advanced and not self.puzzle.getSolved():
             targetPos = self.puzzle.findTarget(tileObj.value)
             allegedMove = self.puzzle.getMove(targetPos[0], targetPos[1])
 

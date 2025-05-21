@@ -15,7 +15,7 @@
     "tiles": {
       "tileWidth": 100,
       "tileSpacing": 0,
-      "advanced": false,
+      "advanced": true,
       "tileBorderWidth": 2
     }
   }
