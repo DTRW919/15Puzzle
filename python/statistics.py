@@ -5,6 +5,9 @@ class Statistics:
     def __init__(self):
         self.resetAll()
 
+        self.bestTime = 0.0
+        self.updateBestTime(start = True)
+
     class Move:
         def __init__(self, direction):
             converter = {
@@ -38,6 +41,68 @@ class Statistics:
 
         with open("../solves.json", "w") as file:
             json.dump(data, file, indent = 2)
+
+    def getAverage(self, num):
+        if os.path.exists("../solves.json"):
+            with open("../solves.json", "r") as file:
+                try:
+                    data = json.load(file)
+                except json.JSONDecodeError:
+                    data = []
+        else:
+            data = []
+
+        numTimes = 0
+        totalTime = 0
+
+        if len(data) == 0 or num > len(data):
+            return 0
+
+        if num == 0:
+            numTimes = len(data)
+        else:
+            numTimes = num
+
+        for i in range(numTimes):
+            totalTime += data[-i]["time"]
+
+        return round(totalTime / numTimes, 3)
+
+    def updateBestTime(self, start = False):
+        if os.path.exists("../solves.json"):
+            with open("../solves.json", "r") as file:
+                try:
+                    data = json.load(file)
+                except json.JSONDecodeError:
+                    data = []
+        else:
+            data = []
+
+        if start:
+            if len(data) == 0:
+                return 0
+
+            bestTime = data[0]["time"]
+
+            for entry in data:
+                if entry["time"] < bestTime:
+                    bestTime = entry["time"]
+
+            self.bestTime = bestTime
+        else:
+            if data[-1]["time"] < self.bestTime or self.bestTime == 0.0: # Can only be 0.0 when there are no solves
+                self.bestTime = data[-1]["time"]
+                return True # Returns true if best time changes, false otherwise
+
+            return False
+
+    def getBestTime(self, start = False):
+        color = "white"
+
+        if self.updateBestTime(start):
+            color = "green"
+
+        return self.bestTime, color # First indice is best time, second is color
 
     def resetAll(self):
         self.solving = False

@@ -58,12 +58,25 @@ class Window:
                     lambda e, o = tileObj: self.onMouseClick(e, o)
                 )
 
-        self.movesPerSecondLabel = tkinter.Label(self.root, text = "1")
-        self.movesPerSecondLabel.grid(row = 0, sticky = "ne")
-        self.movesTotalLabel = tkinter.Label(self.root, text = "2")
+        self.movesTotalLabel = tkinter.Label(self.root, text = "Moves: ")
         self.movesTotalLabel.grid(row = 0, sticky = "nw")
-        self.timeTakenLabel = tkinter.Label(self.root, text = "3")
+        self.timeTakenLabel = tkinter.Label(self.root, text = "Time: ")
         self.timeTakenLabel.grid(row = 0, sticky = "n")
+        self.movesPerSecondLabel = tkinter.Label(self.root, text = "MPS: ")
+        self.movesPerSecondLabel.grid(row = 0, sticky = "ne")
+
+        totalAverage = self.stats.getAverage(0)
+        averageOfFive = self.stats.getAverage(5) # Bottom labels require initial values
+        bestTime = self.stats.getBestTime(start = True)[0]
+
+
+        self.totalAverageLabel = tkinter.Label(self.root, text = f"Average Time: {totalAverage}")
+        self.totalAverageLabel.grid(row = 2, sticky = "sw")
+        self.averageOfFiveLabel = tkinter.Label(self.root, text = f"Ao5: {averageOfFive}")
+        self.averageOfFiveLabel.grid(row = 2, sticky = "s")
+        self.bestTimeLabel = tkinter.Label(self.root, text = f"Best Time: {bestTime}")
+        self.bestTimeLabel.grid(row = 2, sticky = "se")
+
 
         self.solving = False # Initially not solving
 
@@ -154,7 +167,8 @@ class Window:
         key = event.keysym # Grab key from event
 
         settingKeys = [
-            "space"
+            "space",
+            "p"
         ]
 
         movementKeys = [
@@ -172,6 +186,8 @@ class Window:
                 self.puzzle.scramblePuzzle()
                 self.solving = False
                 self.stats.resetAll()
+            elif key == "p":
+                print(self.stats.getAverage(3))
 
     def onMouseClick(self, event, tileObj):
         self.updateAdvanced()
@@ -216,13 +232,13 @@ class Window:
 
     def updateInfo(self):
         if not self.isSolved():
-            movesPerSecond = self.stats.getMPS()
             movesTotal = self.stats.getNumMoves()
             timeTaken = self.stats.getTime()
+            movesPerSecond = self.stats.getMPS()
 
-            self.movesPerSecondLabel.config(text = f"MPS: {movesPerSecond}")
             self.movesTotalLabel.config(text = f"Moves: {movesTotal}")
             self.timeTakenLabel.config(text = f"Time: {timeTaken}")
+            self.movesPerSecondLabel.config(text = f"MPS: {movesPerSecond}")
 
     def updateAdvanced(self):
         self.advanced = self.constants.getConstant("tiles.advanced")
@@ -231,15 +247,24 @@ class Window:
         self.updateTiles()
         self.updateInfo()
 
-        if self.puzzle.getStarted() and not self.solving: # Started solving...
+        if self.puzzle.getStarted() and not self.solving: # On solve start stuff:
             self.solving = True # Change state so this only runs once
 
             self.stats.startTracking()
 
-        if self.puzzle.getSolved() and self.solving: # It's solved!
+        if self.puzzle.getSolved() and self.solving: # On solved stuff:
             self.solving = False # Change state so this only runs once
 
             self.stats.stopTracking()
             self.stats.printFinished()
+
+            totalAverage = self.stats.getAverage(0)
+            averageOfFive = self.stats.getAverage(5)
+            bestTime = self.stats.getBestTime()
+
+            self.totalAverageLabel.config(text = f"Average Time: {totalAverage}")
+            self.averageOfFiveLabel.config(text = f"Ao5: {averageOfFive}")
+            self.bestTimeLabel.config(text = f"Best Time: {bestTime[0]}", fg = bestTime[1])
+
 
         self.root.after(20, self.periodic) # Recursively call every 20ms
