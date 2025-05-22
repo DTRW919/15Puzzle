@@ -85,7 +85,4 @@ class Statistics:
     def getMPS(self):
         self.checkMoveHistory()
 
-        currentTime = time.time()
-        lastSecond = [entry for entry in self.movesHistory if currentTime - entry.timestamp <= 1]
-
-        return len(lastSecond)
+        return round(len(self.movesHistory) / (time.time() - self.startTime), 1)
