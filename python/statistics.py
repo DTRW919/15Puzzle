@@ -1,4 +1,5 @@
 import time
+import json, os
 
 class Statistics:
     def __init__(self):
@@ -16,6 +17,28 @@ class Statistics:
             self.timestamp = time.time()
             self.direction = converter[direction]
 
+    def addEntry(self, startTime, timeTaken, movesTotal, moves): # To solves.json
+        if os.path.exists("../solves.json"):
+            with open("../solves.json", "r") as file:
+                try:
+                    data = json.load(file)
+                except json.JSONDecodeError:
+                    data = []
+        else:
+            data = []
+
+        entry = {
+                "timestamp": startTime,
+                "time": timeTaken,
+                "total moves": movesTotal,
+                "moves": moves
+            }
+
+        data.append(entry)
+
+        with open("../solves.json", "w") as file:
+            json.dump(data, file, indent = 2)
+
     def resetAll(self):
         self.solving = False
         self.movesHistory = []
@@ -32,6 +55,8 @@ class Statistics:
         if self.solving:
             self.solving = False
 
+        self.addEntry(self.startTime, self.timeTaken, len(self.movesHistory), self.getMoves())
+
     def getTime(self):
         if self.solving:
             self.timeTaken = round(time.time() - self.startTime, 3)
@@ -45,7 +70,9 @@ class Statistics:
         for char in direction:
             self.movesHistory.append(self.Move(char))
 
-    def printMoves(self):
+    def getMoves(self):
+        condensedMovesList = ""
+
         lastMove = ""
 
         i = 0
@@ -64,17 +91,17 @@ class Statistics:
                     j += 1
 
                 if counter > 1:
-                    print(counter, end = "")
-                print(lastMove, end = "", flush = True)
+                    condensedMovesList += str(counter)
+                condensedMovesList += lastMove
 
             i += 1
+        return condensedMovesList
 
     def printFinished(self):
         print(f"You completed this 15 Puzzle in {self.getTime()} seconds ", end = "")
         print(f"with a MPS of {self.getMPS()} ", end = "")
         print("following the directions: ")
-        print(*[entry.direction for entry in self.movesHistory], sep = "")
-        self.printMoves()
+        print(self.getMoves())
 
     def getNumMoves(self):
         return len(self.movesHistory)
