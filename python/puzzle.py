@@ -184,8 +184,6 @@ class Puzzle:
                     self.solved = False
                     break
 
-
-
     def scramblePuzzle(self):
         print("Resetting puzzle...")
 
