@@ -1,12 +1,93 @@
 import time
-import json, os
+import json
 
 class Statistics:
     def __init__(self):
         self.resetAll()
 
-        self.bestTime = 0.0
-        self.updateBestTime(start = True)
+        self.defaultStructure = {
+            "records": {
+                "time": 0.0,
+                "averageOfFive": 0.0,
+                "average": 0.0
+            },
+
+            "solves": []
+        }
+
+        try:
+            with open("../solves.json", "r") as file:
+                self.data = json.load(file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            self.data = self.defaultStructure
+            with open("../solves.json", "w") as file:
+                json.dump(self.data, file, indent = 4)
+
+        if not isinstance(self.data, dict):
+            self.data = self.defaultStructure
+
+            if "records" not in self.data or "solves" not in self.data:
+                self.data = self.defaultStructure
+
+        if len(self.data["solves"]) >= 5:
+            lastFiveTimes = sum(entry["time"] for entry in self.data["solves"][-5:])
+            self.currentAverageOfFive = lastFiveTimes / 5
+        else:
+            self.currentAverageOfFive = 0.0
+
+        if len(self.data["solves"]) > 0:
+            self.currentTotalAverage = sum(entry["time"] for entry in self.data["solves"]) / len(self.data["solves"])
+        else:
+            self.currentTotalAverage = 0.0
+
+    def addEntry(self, startTime, timeTaken, movesTotal, moves):
+        entry = {
+                "timestamp": startTime,
+                "time": timeTaken,
+                "total moves": movesTotal,
+                "moves": moves
+            }
+
+        self.data["solves"].append(entry)
+
+        if len(self.data["solves"]) >= 5:
+            lastFiveTimes = sum(entry["time"] for entry in self.data["solves"][-5:])
+            self.currentAverageOfFive = lastFiveTimes / 5
+        else:
+            self.currentAverageOfFive = 0.0
+
+        totalTime = sum(entry["time"] for entry in self.data["solves"])
+        self.currentTotalAverage = totalTime / len(self.data["solves"])
+
+        if self.data["solves"][-1]["time"] < self.data["records"]["time"] or self.data["records"]["time"] == 0.0:
+            self.data["records"]["time"] = self.data["solves"][-1]["time"]
+
+        if self.currentAverageOfFive < self.data["records"]["averageOfFive"] or self.data["records"]["averageOfFive"] == 0.0:
+            if self.currentAverageOfFive != 0.0:
+                self.data["records"]["averageOfFive"] = self.currentAverageOfFive
+
+        if self.currentTotalAverage < self.data["records"]["average"] or self.data["records"]["average"] == 0.0:
+            if self.currentTotalAverage != 0.0:
+                self.data["records"]["average"] = self.currentTotalAverage
+
+        with open("../solves.json", "w") as file:
+            json.dump(self.data, file, indent = 4)
+
+    def getRecord(self, record):
+        recordData = self.data["records"]
+
+        if record   == "time":
+            return recordData["time"]
+        elif record == "Ao5":
+            return recordData["averageOfFive"]
+        elif record == "average":
+            return recordData["average"]
+
+    def getStat(self, stat):
+        if stat   == "average":
+            return self.currentTotalAverage
+        elif stat == "Ao5":
+            return self.currentAverageOfFive
 
     class Move:
         def __init__(self, direction):
@@ -19,90 +100,6 @@ class Statistics:
 
             self.timestamp = time.time()
             self.direction = converter[direction]
-
-    def addEntry(self, startTime, timeTaken, movesTotal, moves): # To solves.json
-        if os.path.exists("../solves.json"):
-            with open("../solves.json", "r") as file:
-                try:
-                    data = json.load(file)
-                except json.JSONDecodeError:
-                    data = []
-        else:
-            data = []
-
-        entry = {
-                "timestamp": startTime,
-                "time": timeTaken,
-                "total moves": movesTotal,
-                "moves": moves
-            }
-
-        data.append(entry)
-
-        with open("../solves.json", "w") as file:
-            json.dump(data, file, indent = 2)
-
-    def getAverage(self, num):
-        if os.path.exists("../solves.json"):
-            with open("../solves.json", "r") as file:
-                try:
-                    data = json.load(file)
-                except json.JSONDecodeError:
-                    data = []
-        else:
-            data = []
-
-        numTimes = 0
-        totalTime = 0
-
-        if len(data) == 0 or num > len(data):
-            return 0
-
-        if num == 0:
-            numTimes = len(data)
-        else:
-            numTimes = num
-
-        for i in range(numTimes):
-            totalTime += data[-i]["time"]
-
-        return round(totalTime / numTimes, 3)
-
-    def updateBestTime(self, start = False):
-        if os.path.exists("../solves.json"):
-            with open("../solves.json", "r") as file:
-                try:
-                    data = json.load(file)
-                except json.JSONDecodeError:
-                    data = []
-        else:
-            data = []
-
-        if start:
-            if len(data) == 0:
-                return 0
-
-            bestTime = data[0]["time"]
-
-            for entry in data:
-                if entry["time"] < bestTime:
-                    bestTime = entry["time"]
-
-            self.bestTime = bestTime
-        else:
-            if data[-1]["time"] < self.bestTime or self.bestTime == 0.0: # Can only be 0.0 when there are no solves
-                self.bestTime = data[-1]["time"]
-                return True # Returns true if best time changes, false otherwise
-
-            return False
-
-    def getBestTime(self, start = False):
-        color = "white"
-
-        if self.updateBestTime(start):
-            color = "green"
-
-        return self.bestTime, color # First indice is best time, second is color
 
     def resetAll(self):
         self.solving = False

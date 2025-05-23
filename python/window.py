@@ -65,10 +65,9 @@ class Window:
         self.movesPerSecondLabel = tkinter.Label(self.root, text = "MPS: ")
         self.movesPerSecondLabel.grid(row = 0, sticky = "ne")
 
-        totalAverage = self.stats.getAverage(0)
-        averageOfFive = self.stats.getAverage(5) # Bottom labels require initial values
-        bestTime = self.stats.getBestTime(start = True)[0]
-
+        totalAverage = self.stats.getStat("average") # Bottom labels require initial values
+        averageOfFive = self.stats.getStat("Ao5")
+        bestTime = self.stats.getRecord("time")
 
         self.totalAverageLabel = tkinter.Label(self.root, text = f"Average Time: {totalAverage}")
         self.totalAverageLabel.grid(row = 2, sticky = "sw")
@@ -76,7 +75,6 @@ class Window:
         self.averageOfFiveLabel.grid(row = 2, sticky = "s")
         self.bestTimeLabel = tkinter.Label(self.root, text = f"Best Time: {bestTime}")
         self.bestTimeLabel.grid(row = 2, sticky = "se")
-
 
         self.solving = False # Initially not solving
 
@@ -258,13 +256,13 @@ class Window:
             self.stats.stopTracking()
             self.stats.printFinished()
 
-            totalAverage = self.stats.getAverage(0)
-            averageOfFive = self.stats.getAverage(5)
-            bestTime = self.stats.getBestTime()
+            totalAverage = self.stats.getStat("average")
+            averageOfFive = self.stats.getStat("Ao5")
+            bestTime = self.stats.getRecord("time")
 
             self.totalAverageLabel.config(text = f"Average Time: {totalAverage}")
             self.averageOfFiveLabel.config(text = f"Ao5: {averageOfFive}")
-            self.bestTimeLabel.config(text = f"Best Time: {bestTime[0]}", fg = bestTime[1])
+            self.bestTimeLabel.config(text = f"Best Time: {bestTime}")
 
 
         self.root.after(20, self.periodic) # Recursively call every 20ms

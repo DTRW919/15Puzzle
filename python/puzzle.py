@@ -202,6 +202,7 @@ class Puzzle:
 
             print(f"there are {inversions} inversions")
             print(*flatPuzzle)
+
             return inversions
 
         def shuffleFlatPuzzle(flatPuzzle):
