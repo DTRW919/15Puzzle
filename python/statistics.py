@@ -76,18 +76,33 @@ class Statistics:
     def getRecord(self, record):
         recordData = self.data["records"]
 
-        if record   == "time":
-            return recordData["time"]
+        if record == "time":
+            if recordData["time"] == self.data["solves"][-1]["time"]:
+                return recordData["time"], "green"
+            else:
+                return recordData["time"], "white"
         elif record == "Ao5":
-            return recordData["averageOfFive"]
+            if recordData["averageOfFive"] == self.currentAverageOfFive:
+                return recordData["averageOfFive"], "green"
+            else:
+                return recordData["averageOfFive"], "white"
         elif record == "average":
-            return recordData["average"]
+            if recordData["average"] == self.currentTotalAverage:
+                return recordData["average"], "green"
+            else:
+                return recordData["average"], "white"
 
     def getStat(self, stat):
-        if stat   == "average":
-            return self.currentTotalAverage
+        if stat == "average":
+            if self.currentTotalAverage == self.data["records"]["average"]:
+                return self.currentTotalAverage, "green"
+            else:
+                return self.currentTotalAverage, "white"
         elif stat == "Ao5":
-            return self.currentAverageOfFive
+            if self.currentAverageOfFive == self.data["records"]["averageOfFive"]:
+                return self.currentAverageOfFive, "green"
+            else:
+                return self.currentAverageOfFive, "white"
 
     class Move:
         def __init__(self, direction):

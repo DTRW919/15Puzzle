@@ -65,15 +65,15 @@ class Window:
         self.movesPerSecondLabel = tkinter.Label(self.root, text = "MPS: ")
         self.movesPerSecondLabel.grid(row = 0, sticky = "ne")
 
-        totalAverage = round(self.stats.getStat("average"), 3) # Bottom labels require initial values
-        averageOfFive = round(self.stats.getStat("Ao5"), 3)
+        totalAverage = self.stats.getStat("average") # Bottom labels require initial values
+        averageOfFive = self.stats.getStat("Ao5")
         bestTime = self.stats.getRecord("time")
 
-        self.totalAverageLabel = tkinter.Label(self.root, text = f"Average Time: {totalAverage}")
+        self.totalAverageLabel = tkinter.Label(self.root, text = f"Average Time: {round(totalAverage[0], 3)}")
         self.totalAverageLabel.grid(row = 2, sticky = "sw")
-        self.averageOfFiveLabel = tkinter.Label(self.root, text = f"Ao5: {averageOfFive}")
+        self.averageOfFiveLabel = tkinter.Label(self.root, text = f"Ao5: {round(averageOfFive[0], 3)}")
         self.averageOfFiveLabel.grid(row = 2, sticky = "s")
-        self.bestTimeLabel = tkinter.Label(self.root, text = f"Best Time: {bestTime}")
+        self.bestTimeLabel = tkinter.Label(self.root, text = f"Best Time: {bestTime[0]}")
         self.bestTimeLabel.grid(row = 2, sticky = "se")
 
         self.solving = False # Initially not solving
@@ -245,24 +245,24 @@ class Window:
         self.updateTiles()
         self.updateInfo()
 
-        if self.puzzle.getStarted() and not self.solving: # On solve start stuff:
+        if self.puzzle.getStarted() and not self.solving: # On solve start:
             self.solving = True # Change state so this only runs once
 
             self.stats.startTracking()
 
-        if self.puzzle.getSolved() and self.solving: # On solved stuff:
+        if self.puzzle.getSolved() and self.solving: # On solved:
             self.solving = False # Change state so this only runs once
 
             self.stats.stopTracking()
             self.stats.printFinished()
 
-            totalAverage = round(self.stats.getStat("average"), 3)
-            averageOfFive = round(self.stats.getStat("Ao5"), 3)
+            totalAverage = self.stats.getStat("average")
+            averageOfFive = self.stats.getStat("Ao5")
             bestTime = self.stats.getRecord("time")
 
-            self.totalAverageLabel.config(text = f"Average Time: {totalAverage}")
-            self.averageOfFiveLabel.config(text = f"Ao5: {averageOfFive}")
-            self.bestTimeLabel.config(text = f"Best Time: {bestTime}")
+            self.totalAverageLabel.config(text = f"Average Time: {round(totalAverage[0], 3)}", fg = self.constants.getConstant("colors." + totalAverage[1]))
+            self.averageOfFiveLabel.config(text = f"Ao5: {round(averageOfFive[0], 3)}", fg = self.constants.getConstant("colors." + averageOfFive[1]))
+            self.bestTimeLabel.config(text = f"Best Time: {bestTime[0]}", fg = self.constants.getConstant("colors." + bestTime[1]))
 
 
         self.root.after(20, self.periodic) # Recursively call every 20ms
