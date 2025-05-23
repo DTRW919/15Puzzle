@@ -65,8 +65,8 @@ class Window:
         self.movesPerSecondLabel = tkinter.Label(self.root, text = "MPS: ")
         self.movesPerSecondLabel.grid(row = 0, sticky = "ne")
 
-        totalAverage = self.stats.getStat("average") # Bottom labels require initial values
-        averageOfFive = self.stats.getStat("Ao5")
+        totalAverage = round(self.stats.getStat("average"), 3) # Bottom labels require initial values
+        averageOfFive = round(self.stats.getStat("Ao5"), 3)
         bestTime = self.stats.getRecord("time")
 
         self.totalAverageLabel = tkinter.Label(self.root, text = f"Average Time: {totalAverage}")
@@ -256,8 +256,8 @@ class Window:
             self.stats.stopTracking()
             self.stats.printFinished()
 
-            totalAverage = self.stats.getStat("average")
-            averageOfFive = self.stats.getStat("Ao5")
+            totalAverage = round(self.stats.getStat("average"), 3)
+            averageOfFive = round(self.stats.getStat("Ao5"), 3)
             bestTime = self.stats.getRecord("time")
 
             self.totalAverageLabel.config(text = f"Average Time: {totalAverage}")
